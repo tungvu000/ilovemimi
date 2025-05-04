@@ -1420,6 +1420,10 @@ end
 
 local HWID = tostring(cloneref(game:GetService("RbxAnalyticsService")):GetClientId()):gsub("%-", "")
 
+getgenv().gethwid = function()
+    return HWID
+end
+
 do
      local org;
      org = hookfunction(request, function(req)

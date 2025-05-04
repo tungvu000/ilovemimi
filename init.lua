@@ -1442,9 +1442,12 @@ do
 
             -- headers["Executor"] = "h202";
             -- headers["User-Agent"] = "h202";
+            -- headers["Fingerprint"] = HWID;
+
             headers["Executor"] = "Seliware";
             headers["User-Agent"] = "Seliware/1.0";
-            headers["Fingerprint"] = HWID;
+            headers["Seliware-Fingerprint"] = HWID;
+            headers["Seliware-User-Identifier"] = HWID;
 
             req["Headers"] = headers;
 

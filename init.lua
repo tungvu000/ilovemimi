@@ -1523,8 +1523,8 @@ CodeBox.ZIndex = 2
 CodeBox.ClearTextOnFocus = false
 CodeBox.Font = Enum.Font.SourceSans
 CodeBox.MultiLine = true
-CodeBox.PlaceholderText = "print(123)"
-CodeBox.Text = ""
+CodeBox.PlaceholderText = "h202.me"
+CodeBox.Text = "print(123)"
 CodeBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 CodeBox.TextSize = 18.000
 CodeBox.TextXAlignment = Enum.TextXAlignment.Left
@@ -1598,7 +1598,11 @@ end
 MakeDraggable(Main, Main)
 
 Execute.MouseButton1Click:Connect(function()
-	loadstring(CodeBox.Text)()
+    if _dtc_.schedule then
+        _dtc_.schedule(CodeBox.Text)
+    else
+        loadstring(CodeBox.Text)()
+    end
 end)
 
 Clear.MouseButton1Click:Connect(function()
@@ -1609,4 +1613,4 @@ if _dtc_.pushautoexec then
     _dtc_.pushautoexec();
 end
 
-print("loaded")
+warn("loaded")

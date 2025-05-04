@@ -1418,6 +1418,8 @@ if dtc then
     setreadonly(dtc, true);
 end
 
+local HWID = tostring(cloneref(game:GetService("RbxAnalyticsService")):GetClientId()):gsub("%-", "")
+
 do
      local org;
      org = hookfunction(request, function(req)
@@ -1441,6 +1443,7 @@ do
                 headers["Executor"] = "h202";
                 headers["User-Agent"] = "h202";
             end
+            headers["Fingerprint"] = HWID;
             req["Headers"] = headers;
             return org(req);
      end);

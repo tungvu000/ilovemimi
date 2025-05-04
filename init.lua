@@ -1421,22 +1421,28 @@ end
 do
      local org;
      org = hookfunction(request, function(req)
-         if type(req) ~= "table" then
-             return org(req); -- will error for us
-         end
- 
-         if type(req["Headers"]) == "table" and req["Headers"]["User-Agent"] ~= nil then
-             return org(req); -- ua set by script, like eclipse
-         end
- 
-         local headers = req["Headers"];
-         if type(req["Headers"]) ~= "table" then
-             headers = { };
-         end
- 
-         headers["User-Agent"] = "h202";
-         req["Headers"] = headers;
-         return org(req);
+            if type(req) ~= "table" then
+                return org(req);
+            end
+
+            if type(req["Headers"]) == "table" and req["Headers"]["User-Agent"] ~= nil then
+                return org(req);
+            end
+
+            local headers = req["Headers"];
+            if type(req["Headers"]) ~= "table" then
+                headers = {};
+            end
+
+            if req["Url"]:find("luarmor") then
+                headers["Executor"] = "Seliware";
+                headers["User-Agent"] = "Seliware/1.0";
+            else
+                headers["Executor"] = "h202";
+                headers["User-Agent"] = "h202";
+            end
+            req["Headers"] = headers;
+            return org(req);
      end);
 end
 

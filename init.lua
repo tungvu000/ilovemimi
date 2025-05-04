@@ -1,1629 +1,3788 @@
--- https://github.com/FaithfulAC/universal-stuff/blob/main/safehookmetamethod.lua
-do
-    -- basically a lua implementation of arg guard (which every executor should have by default rn but GUESS NOT!)
+-- This script was protected using the MoonVeil Obfuscator v1.1.1 [https://moonveil.cc]
 
-    local options = shmmoptions or safehookmetamethodoptions or {
-        Namecall = true,
-        Index = true,
-        Newindex = true
-    }
-
-    local hmm = hookmetamethod -- hmmmmmmmmmmmmmmmm
-    local cclosure = newcclosure
-
-    local KeepOriginalHookMetaMethod = getgenv().KeepHMM or getgenv().KeepHookmetamethod or false
-
-    --[[local LoadCStackOverflowBypass = false
-
-    if LoadCStackOverflowBypass then -- checking if c stack overflow bypass was already initiated
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/FaithfulAC/universal-stuff/main/c-stack-overflow-universal-bypass.lua"))()
-    end]]
-
-    local __namecall, __index, __newindex =
-        clonefunction(getrawmetatable(game).__namecall),
-        clonefunction(getrawmetatable(game).__index),
-        clonefunction(getrawmetatable(game).__newindex)
-
-    local isSafeIndex = function(arg)
-        return (typeof(arg) == "string" and string.split(arg, "\0")[2] == nil) -- run safehookmetamethod if you want to hook index a property, not an instance!!!
+local db=getfenv()
+local wd=function(Mk,Nl)
+    local Hl,Ee,Ah,lb,Rf,ua,xm,Xe,vk,if_,ui
+    Xe,Rf={[23108]=-10215,[-7394]=-23059,[14816]=5302,[-10611]=-7048,[-387]=23026},function(Ob)
+        return Xe[Ob- -29517]
     end
-
-    local sNamecall, sIndex, sNewindex = 
-        function(...)
-            
-            local args = {...}
-            local self = args[1]
-            
-            if typeof(self) == "Instance" and select("#", ...) > 0 and select("#", ...) < 8000 then return true end
-            return false
-            
-        end, function(...)
-        
-        local args = {...}
-        local self = args[1]
-        
-        if typeof(self) == "Instance" and (isSafeIndex(args[2]) or typeof(args[2]) == "number") and select("#", ...) >= 2 and select("#", ...) < 8000 then return true end
-        return false
-        
-    end, function(...)
-        
-        local args = {...}
-        local self = args[1]
-        
-        if typeof(self) == "Instance" and isSafeIndex(args[2]) and select("#", ...) >= 3 and select("#", ...) < 8000 then return true end
-        return false
-        
-    end
-
-    local __oldnamecall, __oldindex, __oldnewindex = __namecall, __index, __newindex;
-
-    if options.Namecall then
-        hmm(game,"__namecall", function(...)
-            local args = {...}
-            if not sNamecall(...) then return __oldnamecall(...) end
-        
-            return __namecall(...)
-        end)
-    end
-
-    if options.Index then
-        hmm(game,"__index", function(...)
-            local args = {...}
-            if not sIndex(...) then return __oldindex(...) end
-        
-            return __index(...)
-        end)
-    end
-
-    if options.Newindex then
-        hmm(game,"__newindex", function(...)
-            local args = {...}
-            if not sNewindex(...) then return __oldnewindex(...) end
-        
-            return __newindex(...)
-        end)
-    end
-        
-    getgenv().safehookmetamethod = newcclosure(function(...)
-        local obj, method, fnc = ...
-        if typeof(obj) ~= "Instance" then return hmm(...) end -- object is not an Instance therefore is not supported
-        
-        if method == "__namecall" then
-            local orgnm = __namecall
-            __namecall = cclosure(fnc)
-            
-            return orgnm
-            
-        elseif method == "__index" then
-            local orgi = __index
-            __index = cclosure(fnc)
-            
-            return orgi
-            
-        elseif method == "__newindex" then
-            local orgni = __newindex
-            __newindex = cclosure(fnc)
-            
-            return orgni
-            
-        end
-        
-        return hmm(...)
-    end)
-
-    if not KeepOriginalHookMetaMethod then getgenv().hookmetamethod = safehookmetamethod end
-end
-
--- https://raw.githubusercontent.com/FaithfulAC/RBLX_Scripts/refs/heads/main/Universal/Bypasses.lua
-do
-    -- GCInfo/CollectGarbage Bypass (Realistic by Lego - Amazing work!)
-    task.spawn(function()
-        repeat task.wait() until game:IsLoaded()
-
-        local Amplitude = 200
-        local RandomValue = {-200,200}
-        local RandomTime = {.1, 1}
-
-        local floor = math.floor
-        local cos = math.cos
-        local sin = math.sin
-        local acos = math.acos
-        local pi = math.pi
-
-        local Maxima = 0
-
-        --Waiting for gcinfo to decrease
-        while task.wait() do
-            if gcinfo() >= Maxima then
-                Maxima = gcinfo()
-            else
-                break
-            end
-        end
-
-        task.wait(0.30)
-
-        local OldGcInfo = gcinfo()+Amplitude
-        local tick = 0
-
-        --Spoofing gcinfo
-        local function getreturn()
-            local Formula = ((acos(cos(pi * (tick)))/pi * (Amplitude * 2)) + -Amplitude )
-            return floor(OldGcInfo + Formula);
-        end
-
-        local Old; Old = hookfunction(getrenv().gcinfo, function(...)
-            return getreturn();
-        end)
-        local Old2; Old2 = hookfunction(getrenv().collectgarbage, function(arg, ...)
-            local suc, err = pcall(Old2, arg, ...)
-            if suc and arg == "count" then
-                return getreturn();
-            end
-            return Old2(arg, ...);
-        end)
-
-
-        game:GetService("RunService").Stepped:Connect(function()
-            local Formula = ((acos(cos(pi * (tick)))/pi * (Amplitude * 2)) + -Amplitude )
-            if Formula > ((acos(cos(pi * (tick)+.01))/pi * (Amplitude * 2)) + -Amplitude ) then
-                tick = tick + .07
-            else
-                tick = tick + 0.01
-            end
-        end)
-
-        local old1 = Amplitude
-        for i,v in next, RandomTime do
-            RandomTime[i] = v * 10000
-        end
-
-        local RandomTimeValue = math.random(RandomTime[1],RandomTime[2])/10000
-
-        --I can make it 0.003 seconds faster, yea, sure
-        while wait(RandomTime) do
-            Amplitude = math.random(old1+RandomValue[1], old1+RandomValue[2])
-            RandomTimeValue = math.random(RandomTime[1],RandomTime[2])/10000
-        end
-    end)
-
-    -- Memory Bypass
-    task.spawn(function()
-        repeat task.wait() until game:IsLoaded()
-
-        local RunService = cloneref(game:GetService("RunService"))
-        local Stats = cloneref(game:GetService("Stats"))
-
-        local CurrMem = Stats:GetTotalMemoryUsageMb();
-        local Rand = 0
-
-        RunService.Stepped:Connect(function()
-            local random = Random.new()
-            Rand = random:NextNumber(-10, 10);
-        end)
-
-        local function GetReturn()
-            return CurrMem + Rand;
-        end
-
-        local _MemBypass
-        _MemBypass = hookmetamethod(game, "__namecall", function(self,...)
-            local method = getnamecallmethod();
-
-            if not checkcaller() then
-                if typeof(self) == "Instance" and (method == "GetTotalMemoryUsageMb" or method == "getTotalMemoryUsageMb") and self.ClassName == "Stats" then
-                    return GetReturn();
+    ui=Rf(-29904)
+    repeat
+        while true do
+            if ui==1587017792-1587028007 then
+                if_=if_+vk;
+                xm=if_;
+                if if_~=if_ then
+                    ui=Rf(-36911)
+                else
+                    ui=1446191324+-1446186022
                 end
-            end
-
-            return _MemBypass(self,...)
-        end)
-
-        -- Indexed Versions
-        local _MemBypassIndex; _MemBypassIndex = hookfunction(Stats.GetTotalMemoryUsageMb, function(self, ...)
-            if not checkcaller() then
-                if typeof(self) == "Instance" and self.ClassName == "Stats" then
-                    return GetReturn();
-                end
-            end
-        end)
-    end)
-
-    -- Memory Bypass X2 (Newer Method / Func)
-    task.spawn(function()
-        repeat task.wait() until game:IsLoaded()
-
-        local RunService = cloneref(game:GetService("RunService"))
-        local Stats = cloneref(game:GetService("Stats"))
-
-        local CurrMem = Stats:GetMemoryUsageMbForTag(Enum.DeveloperMemoryTag.Gui);
-        local Rand = 0
-
-        RunService.Stepped:Connect(function()
-            local random = Random.new()
-            Rand = random:NextNumber(-0.1, 0.1);
-        end)
-
-        local function GetReturn()
-            return CurrMem + Rand;
-        end
-
-        local _MemBypass
-        _MemBypass = hookmetamethod(game, "__namecall", function(self,...)
-            local method = getnamecallmethod();
-
-            if not checkcaller() then
-                if typeof(self) == "Instance" and (method == "GetMemoryUsageMbForTag" or method == "getMemoryUsageMbForTag") and self.ClassName == "Stats" then
-                    return GetReturn();
-                end
-            end
-
-            return _MemBypass(self,...)
-        end)
-
-        -- Indexed Versions
-        local _MemBypassIndex; _MemBypassIndex = hookfunction(Stats.GetMemoryUsageMbForTag, function(self, ...)
-            if not checkcaller() then
-                if typeof(self) == "Instance" and self.ClassName == "Stats" then
-                    return GetReturn();
-                end
-            end
-        end)
-    end)
-
-    -- ContentProvider Bypasses
-    local Content = cloneref(game:GetService("ContentProvider"));
-    local CoreGui = cloneref(game:GetService("CoreGui"));
-    local randomizedCoreGuiTable;
-    local randomizedGameTable;
-
-    local coreguiTable = {}
-
-    game:GetService("ContentProvider"):PreloadAsync({CoreGui}, function(assetId) --use preloadasync to patch preloadasync :troll:
-        if not assetId:find("rbxassetid://") then
-            table.insert(coreguiTable, assetId);
-        end
-    end)
-    local gameTable = {}
-
-    for i, v in pairs(game:GetDescendants()) do
-        if v:IsA("ImageLabel") then
-            if v.Image:find('rbxassetid://') and v:IsDescendantOf(CoreGui) then else
-                table.insert(gameTable, v.Image)
-            end
-        end
-    end
-
-    function randomizeTable(t)
-        local n = #t
-        while n > 0 do
-            local k = math.random(n)
-            t[n], t[k] = t[k], t[n]
-            n = n - 1
-        end
-        return t
-    end
-
-    local ContentProviderBypass
-    ContentProviderBypass = hookmetamethod(game, "__namecall", function(self, Instances, ...)
-        local method = getnamecallmethod();
-        local args = ...;
-
-        if not checkcaller() and (method == "preloadAsync" or method == "PreloadAsync") then
-            if Instances and Instances[1] and self.ClassName == "ContentProvider" then
-                if Instances ~= nil then
-                    if typeof(Instances[1]) == "Instance" and (table.find(Instances, CoreGui) or table.find(Instances, game)) then
-                        if Instances[1] == CoreGui then
-                            randomizedCoreGuiTable = randomizeTable(coreguiTable)
-                            return ContentProviderBypass(self, randomizedCoreGuiTable, ...)
+            elseif ui==2.9040595753708959e-05*792890070 then
+                Ah,ua,Hl,lb=db['bit3\50']and db['bit3\50'].bxor or function(qh,Me)
+                    local mg,Lg,Fm,o,Xb,pg,Yj,rb
+                    rb,Yj={[20606]=11799,[19423]=-31131,[-24417]=-21719,[-16636]=-30304,[87]=11799,[-19309]=-31131,[3604]=8822,[32161]=14898,[-24371]=10595,[16730]=10595,[-12365]=26973,[-19096]=-10059,[-10506]=4921,[18058]=11799,[1503]=4921,[22536]=-27031,[-1716]=22390,[-7291]=-17590},function(uk)
+                        return rb[uk+-19312]
+                    end
+                    o=Yj(12021)
+                    repeat
+                        while true do
+                            if o==-29781898777830/1693115337 then
+                                Lg,Xb=1.0430959591256339e-09*958684569,0*1678676340
+                                o=-5.9666884053139316e-05*453031869
+                            elseif o==544400732-544410791 then
+                                return Xb
+                            elseif o==483063979-483085698 then
+                                Xb=Xb+Lg
+                                o=Yj(20815)
+                            elseif o==-2072179555+2072148424 then
+                                if qh>0/802949973 then
+                                    o=-176326651+176326745
+                                else
+                                    o=Yj(216)
+                                end
+                            elseif o==750937778-750968082 then
+                                o=Yj(39918);
+                            elseif o==-4013784262656/568846976 then
+                                if qh<Me then
+                                    o=Yj(51473)
+                                    break
+                                end
+                                o=Yj(-5059)
+                            elseif o==20678757038/219986777 then
+                                mg=qh%(1990189488+-1990189486)
+                                if not(mg>-2.2981918935593995*892649605-(-648363354+-1403116732))then
+                                    o=Yj(2676)
+                                    break
+                                else
+                                    o=Yj(22916)
+                                    break
+                                end
+                                o=Yj(37370)
+                            elseif o==-8.4224591079852342e-06*-1257946149 then
+                                o=Yj(3);
+                            elseif o==17121719982466/1940798003 then
+                                Xb=Xb+Lg
+                                o=Yj(19399)
+                            elseif o==-1040921395+1040926316 then
+                                qh,Me,Lg=(qh-pg)/(269661090+-269661088),(Me-Fm)/(-1113918419+1113918421),Lg*(1691045213+-1691045211)
+                                o=Yj(41848)
+                            elseif o==2.5968368010953433e-05*862202815 then
+                                pg,Fm=qh%(5.7966213378123827e-09*345028575),Me%(2.170761265646683e-09*921335769)
+                                if not(pg~=Fm)then
+                                    o=Yj(6947)
+                                    break
+                                else
+                                    o=Yj(-5105)
+                                    break
+                                end
+                                o=-3.1982687104000178e-06*-1538644950
+                            elseif o==48234890162375/-1784428625 then
+                                if qh>0/1160486240 and Me>-0*-815393636 then
+                                    o=Yj(17596)
+                                else
+                                    o=10718520756048/-1519064733
+                                end
+                            elseif o==1123552786-1123525813 then
+                                o=Yj(8806);
+                            elseif o==-611265984- -611277783 then
+                                qh,Lg=(qh-mg)/(1538273942+-1538273940),Lg*(-132070629- -132070631)
+                                o=Yj(38735)
+                            elseif o==1770363298+-1770348400 then
+                                qh=Me
+                                o=Yj(36042)
+                            end
                         end
-
-                        if Instances[1] == game then
-                            randomizedGameTable = randomizeTable(gameTable)
-                            return ContentProviderBypass(self, randomizedGameTable, ...)
-                        end
-                    end
+                    until o==-3.0453953747582834e-06*939122724
+                end,db['string'].char,db['string'].byte,''
+                Ee,vk,if_=#Mk- -1.2637869807577008e-09*-791272592,1,-365571382+365571382
+                ui=Rf(-40128)
+            elseif ui==1609162779+-1609157477 then
+                if(vk>=0 and if_>Ee)or((vk<0 or vk~=vk)and if_<Ee)then
+                    ui=-1.0755933223414403e-05*2143840011
+                else
+                    ui=-39050341591788/1899705273
                 end
+            elseif ui==-1456297512+1456290464 then
+                xm=if_;
+                if Ee~=Ee then
+                    ui=1196831916-1196854975
+                else
+                    ui=Rf(-14701)
+                end
+            elseif ui==-1307431947- -1307411391 then
+                lb=lb..ua(Ah(Hl(Mk,xm+624313450/624313450),Hl(Nl,xm%#Nl+(-1380894280+1380894281))))
+                ui=Rf(-6409)
+            elseif ui==-43167822985111/1872059629 then
+                return lb
             end
         end
-
-        return ContentProviderBypass(self, Instances, ...)
-    end)
-
-    local preloadBypass; preloadBypass = hookfunction(Content.PreloadAsync, function(a, b, c)
-        if not checkcaller() then
-            if typeof(a) == "Instance" and tostring(a) == "ContentProvider" and typeof(b) == "table" then
-                if (table.find(b, CoreGui) or table.find(b, game)) and not (table.find(b, true) or table.find(b, false)) then
-                    if b[1] == CoreGui then -- Double Check
-                        randomizedCoreGuiTable = randomizeTable(coreguiTable)
-                        return preloadBypass(a, randomizedCoreGuiTable, c)
-                    end
-                    if b[1] == game then -- Triple Check
-                        randomizedGameTable = randomizeTable(gameTable)
-                        return preloadBypass(a, randomizedGameTable, c)
-                    end
-                end
-            end
-        end
-
-        return preloadBypass(a, b, c)
-    end)
-
-    -- GetFocusedTextBox Bypass
-    local _IsDescendantOf = game.IsDescendantOf
-
-    local TextboxBypass
-    TextboxBypass = hookmetamethod(game, "__namecall", function(self,...)
-        local method = getnamecallmethod();
-        local args = ...;
-
-        if not checkcaller() then
-            if typeof(self) == "Instance" and method == "GetFocusedTextBox" and self.ClassName == "UserInputService" then
-                local Textbox = TextboxBypass(self,...);
-                if Textbox and typeof(Textbox) == "Instance" then
-                    local succ,err = pcall(function() _IsDescendantOf(Textbox, Bypassed_Dex) end)
-
-                    if err and err:match("The current identity") then
-                        return nil;
-                    end
-                end
-            end
-        end
-
-        return TextboxBypass(self,...);
-    end)
-
-    --Newproxy Bypass (Stolen from Lego Hacker (V3RM))
-    local TableNumbaor001 = {}
-    local SomethingOld;
-    SomethingOld = hookfunction(getrenv().newproxy, function(...)
-        local proxy = SomethingOld(...)
-        table.insert(TableNumbaor001, proxy)
-        return proxy
-    end)
-
-    local RunService = cloneref(game:GetService("RunService"))
-    RunService.Stepped:Connect(function()
-        for i,v in pairs(TableNumbaor001) do
-            if v == nil then end
-        end
-    end)
+    until ui==-1958112442+1958111687
 end
-
--- https://github.com/FaithfulAC/universal-stuff/blob/main/c-stack-overflow-universal-bypass.lua
+local wm,kl,ek=pairs,getmetatable,type;
 do
-    local args = (...) or { -- args should be a table
-        StackThreshold = 195,
-        StackThresholdMax = 198,
-        error1 = "C stack overflow",
-        error2 = "cannot resume dead coroutine",
-        custom_error = nil, -- for this you can put in any error and if a function results in that error then it will return...
-        custom_error_return = nil, -- what you put for this
-        ExcludedFunctions = {},
-        IncludedFunctions = {}, -- if there are any functions in this table then ExcludedFunctions will simply be disregarded
-        IncludeLuaFunctions = true -- if there are any functions in IncludedFunctions then this will automatically be false
-    }
-
-    local stackThreshold = args.StackThreshold or 195
-    local stackThresholdMax = args.StackThresholdMax or 198
-    local firstError = args.error1 or "C stack overflow"
-    local secondError = args.error2 or "cannot resume dead coroutine"
-    local customError = args.custom_error
-    local customErrorReturn = args.custom_error_return or ""
-    local excludedFunctions = args.ExcludedFunctions or {}
-    local includedFunctions = args.IncludedFunctions or {}
-    local includeLuaFunctions = true; -- bool values can really screw things up
-
-    if (args.includeLuaFunctions ~= nil) then
-        includeLuaFunctions = args.includeLuaFunctions;
+    local tb,be,lc,ra,Mi,me,Si,cj=db[wd('\220\56\171\29\150\223$\175\31\151\220','\175P\198p\249')]or db[wd("=\202\253(0\1\144\220\255+g\220#\206\239%7\n\144\199\230\'|\211=",'N\171\155MXn\255\183\146N\19\189')]or{[wd('\22\178\22:;\178\23\51','X\211{_')]=true,[wd('\227\254\206\245\210','\170\144')]=true,[wd('\21\23\50@5\22 Q','[rE)')]=true},db[wd('\180{\181\175w\236\22\189y\191\176r\230\6','\220\20\218\196\26\137b')],db[wd('\213\195\210Y\237\215\201\214O\252\222','\187\166\165:\142')],db[wd('\223\r\230\223\r\252\206','\184h\146')]()[wd('\201\148\207\242\185\231\207','\130\241\170')]or db[wd('\204z\130\204z\152\221','\171\31\246')]()[wd('u\198G&\240x\206&7[\215C;\221c\201\">','>\163\"V\184\23\161MZ')]or false,db[wd("b\179+o9!t\177\'u5(o",'\1\223D\1\\G')](db[wd('d?\153JY\177\169f.\140LY\164\168f','\3Z\237\56\56\198\196')](db[wd('\230f\236b','\129\a')])[wd('wO\140\153\184Ms\131\148\185','(\16\226\248\213')]),db[wd('\167\29\211\52\200B\177\31\223.\196K\170','\196q\188Z\173$')](db[wd('Z\220l>\241\206\57X\205y8\241\219\56X','=\185\24L\144\185T')](db[wd('}\134w\130','\26\231')])[wd('\196Z\0\245a\f\227','\155\5i')]),db[wd('\n\30\184\218p\167\28\28\180\192|\174\a','ir\215\180\21\193')](db[wd('\149\204\165\193\202\141\55\151\221\176\199\202\152\54\151','\242\169\209\179\171\250Z')](db[wd('\252.\246*','\155O')])[wd('U4\227\167\239c\5\233\167\224','\nk\141\194\152')]),function(nj)
+        return(db[wd('v\200\143g\222\153','\2\177\255')](nj)==wd('\234\210I\240\200\\','\153\166;')and db[wd('l#5v9 ','\31WG')][wd('\145y\142\96\150','\226\t')](nj,wd('5','5'))[1686575502-1686575500]==nil)
     end
-
-    local luaCacheFunctions = --[[setmetatable(]]{}--[[, {__mode = "v"}) -- while a weaktable is not completely reliable it helps mitigate most of the cor.wrap detections]]
-
-    if #includedFunctions > 0 then
-        includeLuaFunctions = false
-        table.clear(excludedFunctions)
-    end
-
-    local pack, unpack, info, find, error = table.pack, unpack, debug.info, table.find, getrenv().error;
-    local Cache = {}
-    local WrapHook;
-
-    local function CheckValidity(func)
-        if (not includeLuaFunctions) and (info(func, "s") ~= "[C]" or table.find(luaCacheFunctions, func)) then
-            return false
-        elseif #includedFunctions > 0 and not find(includedFunctions, func) then
-            return false
-        elseif table.find(excludedFunctions, func) then
-            return false
+    local ce,Ia,Qg,Qf,Jd,xi=function(...)
+        local Xd,self,Vc,lm,Hg
+        lm,Hg={[-30597]=10043,[10199]=-3371,[-2216]=-1927},function(Ph)
+            return lm[Ph+-31704]
         end
-        return true
-    end
-
-    local function IsInCache(func)
-        for i, tbl in Cache do
-            if tbl.Wrapped == func or tbl.ReplacementFunc == func then
-                return tbl
-            end
-        end
-        return nil
-    end
-
-    local function InsertInCache(func, wrapped)
-        if typeof(func) ~= "function" or typeof(wrapped) ~= "function" then return end
-
-        local New; New = {
-            WrapCount = 1,
-            Original = func,
-            ReplacementFunc = function(...)
-                --[[if select("#", ...) >= 8000 then
-                    return error("too many arguments to resume", 2)
-                end]]
-
-                local args = pack(pcall(WrapHook(func), ...))
-
-                if not args[1] then
-                    local err = args[2]
-
-                    if err ~= "cannot resume dead coroutine" and New.WrapCount > stackThresholdMax then
-                        task.spawn(New.Gc)
-                        return error(firstError, 2)
-                    elseif err == "cannot resume dead coroutine" or select(2, pcall(WrapHook(wrapped))) == "cannot resume dead coroutine" then
-                        task.spawn(New.Gc)
-                        return error(secondError, 2)
-                    elseif customError and err == customError then
-                        task.spawn(New.Gc)
-                        return error(customErrorReturn, 2)
-                    end
-
-                    task.spawn(New.Gc)
-                    return error(err, 2)
-                end
-
-                task.spawn(New.Gc)
-
-                return unpack(args, 2, args.n)
-            end,
-            Wrapped = wrapped,
-            Gc = function()
-                table.remove(Cache, table.find(Cache, New))
-            end,
-        }
-
-        table.insert(Cache, New)
-    end
-
-    WrapHook = hookfunction(getrenv().coroutine.wrap, function(...)
-        local Target = ...
-
-        if not checkcaller() and typeof(Target) == "function" then
-            local CacheTbl = IsInCache(Target)
-
-            if CacheTbl then
-                local Validity = CheckValidity(Target)
-                if not Validity then
-                    local res = WrapHook(...)
-
-                    if table.find(luaCacheFunctions, Target) then
-                        luaCacheFunctions[table.find(luaCacheFunctions, Target)] = res
-                    else
-                        table.insert(luaCacheFunctions, res)
-                    end
-
-                    return res;
-                end
-                CacheTbl.WrapCount += 1
-
-                if CacheTbl.WrapCount == stackThreshold then
-                    local NewFunc = WrapHook(CacheTbl.ReplacementFunc)
-                    CacheTbl.Original, CacheTbl.ReplacementFunc = NewFunc, NewFunc
-                    CacheTbl.Wrapped = WrapHook(CacheTbl.Wrapped)
-
-                    return NewFunc
-                elseif CacheTbl.WrapCount < stackThreshold or CacheTbl.WrapCount > stackThresholdMax then
-                    local NewFunc = WrapHook(CacheTbl.Wrapped)
-                    CacheTbl.Wrapped = NewFunc
-
-                    return NewFunc
-                end
-
-                local NewFunc = WrapHook(CacheTbl.ReplacementFunc)
-                CacheTbl.Original, CacheTbl.ReplacementFunc = NewFunc, NewFunc
-                CacheTbl.Wrapped = WrapHook(WrapHook(CacheTbl.Wrapped))
-
-                return NewFunc
-            else
-                local arg = WrapHook(...)
-                InsertInCache(Target, arg)
-
-                return arg
-            end
-        end
-
-        return WrapHook(...)
-    end)
-end
-
--- https://github.com/FaithfulAC/universal-stuff/blob/main/debug-traceback-bypass.lua
-do
-    local exploitsrc = debug.info(1, "s") -- if your exploit src changes every execution you're fucked
-    local split, match, gsub, remove, concat = string.split, string.match, string.gsub, table.remove, table.concat
-    
-    local h; h = hookfunction(getrenv().debug.traceback, function(...)
-        local res = h(...)
-    
-        if not checkcaller() and typeof(res) == "string" and match(res, exploitsrc) then
-            res = split(res, "\n")
-            remove(res, 1) -- remove this hookfunction func trace
-            res = concat(res, "\n")
-            if exploitsrc ~= "" then
-                res = gsub(res, exploitsrc .. ":%d+\n", "")
-                res = gsub(res, exploitsrc .. ":%d+", "")
-            else
-                res = gsub(res, exploitsrc .. "\n:%d+\n", "\n")
-                res = gsub(res, exploitsrc .. "\n:%d+", "\n")
-            end
-        end
-    
-        return res
-    end)
-end
-
--- https://github.com/FaithfulAC/universal-stuff/blob/main/true-secure-dex-bypasses.lua#L183
-do
-    -- inspiration from universal bypasses by babyhamsta and obviously originally inspired by secure dex by babyhamsta
-    -- if you find any errors or detections in the logic of any of these hooks please submit an issue (or pull request if you're that dedicated)
-
-    --[[
-        made by @__europa
-        big thanks to kaxr and babyhamsta
-    ]]
-
-    local clonefunction = clonefunc or clonefunction or function(...) return ... end
-    local cloneref = cloneref or function(...) return ... end
-    local hookmetamethod, hookfunction = hookmetamethod, hookfunction
-    local getrenv = getrenv or getfenv
-    local getgenv = getgenv or getfenv
-    local getnamecallmethod = getnamecallmethod
-    local getconnections = getconnections
-    local getgc = getgc
-    local getreg = getreg
-    local checkcaller = checkcaller or function() return false end
-    local iscclosure = iscclosure or function(func) return debug.info(func, "s") == "[C]" end
-    local isourclosure = isourclosure or isexecutorclosure or function(func) return rawequal(getfenv(func), getfenv()) end
-
-    local GetDebugId = clonefunction(game.GetDebugId)
-    local IsDescendantOf = clonefunction(game.IsDescendantOf)
-
-    local options = (...) or getgenv().DexOptions or getgenv().options or {
-        gcinfo = true,
-        GetTotalMemoryUsageMb = true,
-        GetMemoryUsageMbForTag = true,
-        PreloadAsync = true,
-        InstanceCount = true,
-        UI2DDrawcallCount = true,
-        UI2DTriangleCount = true,
-        GetFocusedTextBox = true,
-        GuiObjects = true,
-        Weaktable = true
-    }
-
-    local compareinstances = compareinstances or function(ins1, ins2)
-        local identity;
-        if getthreadidentity then identity = getthreadidentity() else identity = 2 end
-        if setthreadidentity then setthreadidentity(8) end
-        
-        local bool = typeof(ins1) == typeof(ins2) and typeof(ins1) == "Instance" and GetDebugId(ins1) == GetDebugId(ins2)
-        
-        if setthreadidentity then setthreadidentity(identity) end
-        return bool;
-    end
-
-    local Player = cloneref(game:GetService("Players").LocalPlayer or game:GetService("Players"):GetPropertyChangedSignal("LocalPlayer"):Wait())
-    local RunService = cloneref(game:GetService("RunService"))
-    local Stats = cloneref(game:GetService("Stats"))
-    local CoreGui = cloneref(game:GetService("CoreGui"))
-    local UserInputService = cloneref(game:GetService("UserInputService"))
-    local GuiService = cloneref(game:GetService("GuiService"))
-    local ContentProvider = cloneref(game:GetService("ContentProvider"))
-    local StarterGui = cloneref(game:GetService("StarterGui"))
-    local PlayerGui = cloneref(game:GetService("Players").LocalPlayer:FindFirstChildWhichIsA("PlayerGui"))
-    local DexGui = Dex or Bypassed_Dex or select(2, ...) or CoreGui:FindFirstChild("RobloxGui") -- for textbox and mem/inscount increase
-    repeat task.wait() until game:IsLoaded()
-
-    -- make DexGui be set to the folder parent so any more guis added under the folder will also have certain protections
-    if DexGui.Parent.Name == "DexHost" then
-        DexGui = DexGui.Parent
-    end
-
-    if select(3, ...) == true and cloneref(game) ~= game then -- means script is under an actor and cloneref works as intended
-        options.Weaktable = false -- it is under an actor, therefore it is under a different lua state; no weaktable spoofs are necessary
-    end
-
-    -- for realism of gcinfo, inscount, and memory spoofs
-    local gcinfo_ret, inscount_ret, memtag_ret, totalmem_ret, drawcall_ret, triangle_ret
-        = gcinfo(), Stats.InstanceCount, Stats:GetMemoryUsageMbForTag("Gui"), Stats:GetTotalMemoryUsageMb(), Stats.UI2DDrawcallCount, Stats.UI2DTriangleCount;
-
-    local GetRandomMemoryIncrease = function()
-        return ((math.random(1e7, 1e9)*1005)+.5)/1e14
-    end
-
-    local GuiClasses = { -- instances that can increase memory for gui
-        TextLabel = GetRandomMemoryIncrease(),
-        TextButton = GetRandomMemoryIncrease(),
-        Frame = GetRandomMemoryIncrease(),
-        VideoFrame = GetRandomMemoryIncrease(),
-        ViewportFrame = GetRandomMemoryIncrease(),
-        ScrollingFrame = GetRandomMemoryIncrease(),
-        ImageLabel = GetRandomMemoryIncrease(),
-        ImageButton = GetRandomMemoryIncrease()
-    }
-
-    if options.GetMemoryUsageMbForTag or options.InstanceCount then
-        local GetDescendants = clonefunction(game.GetDescendants)
-        
-        game.DescendantAdded:Connect(function(ins) -- mark those under datamodel
-            if not IsDescendantOf(ins, DexGui) then
-                if GuiClasses[ins.ClassName] then
-                    memtag_ret += GuiClasses[ins.ClassName]
-                end
-                ins = nil
-                inscount_ret += 1
-            end
-        end)
-
-        game.DescendantRemoving:Connect(function(ins)
-            if not IsDescendantOf(ins, DexGui) then
-                local GuiReturn = GuiClasses[ins.ClassName]
-                ins = nil
-                task.wait(math.random())
-
-                if GuiReturn then
-                    memtag_ret -= GuiReturn
-                end
-                inscount_ret -= 1
-            
-                if math.random(2) == 2 then -- for fun
-                    task.wait(math.random())
-                    inscount_ret -= 1
-                end
-            end
-        end)
-
-        local OrgClone;
-
-        local markup = newcclosure(function(...)
-            local result = OrgClone(...)
-
-            if not checkcaller() and typeof(result) == "Instance" and result.Parent == nil then
-                if GuiClasses[result.ClassName] then
-                    memtag_ret += GuiClasses[result.ClassName]
-                end
-
-                inscount_ret += #GetDescendants(result) + 1
-            end
-
-            return result
-        end)
-
-        OrgClone = hookfunction(game.Clone, markup)
-        hookfunction(game.clone, markup)
-
-        local CloneHook; CloneHook = hookmetamethod(game, "__namecall", function(...)
-            local self = ...
-            local method = getnamecallmethod()
-
-            if not checkcaller() and typeof(self) == "Instance" and (method == "Clone" or method == "clone") then
-                return markup(...)
-            end
-
-            return CloneHook(...)
-        end)
-
-        local InsCountHook, InsCountHook2;
-
-        InsCountHook = hookfunction(getrenv().Instance.new, function(...)
-            local result = InsCountHook(...)
-
-            if not checkcaller() and typeof(result) == "Instance" then
-                if GuiClasses[result.ClassName] then
-                    memtag_ret += GuiClasses[result.ClassName]
-                end
-
-                inscount_ret += 1
-            end
-
-            return result
-        end)
-
-        InsCountHook2 = hookfunction(getrenv().Instance.fromExisting, function(...)
-            local result = InsCountHook2(...)
-
-            if not checkcaller() and typeof(result) == "Instance" then
-                if GuiClasses[result.ClassName] then
-                    memtag_ret += GuiClasses[result.ClassName]
-                end
-
-                inscount_ret += 1
-            end
-
-            return result
-        end)
-    end
-
-    if options.UI2DDrawcallCount or options.UI2DTriangleCount then
-        task.delay(math.random()*1.5, function() -- wait a little bit after dex loads in
-            local OldDrawcall, OldTriangle = drawcall_ret, triangle_ret
-            while task.wait(math.random()*1.5) do -- change it periodically
-                drawcall_ret += math.random(-4, 4)
-                triangle_ret += math.random(-4, 4)
-
-                if math.random(10) == 10 then -- change it back to somewhere around the default
-                    drawcall_ret = math.abs(OldDrawcall + math.random(-8, 8))
-                    triangle_ret = math.abs(OldTriangle + math.random(-8, 8))
-                end
-            end
-        end)
-    end
-
-    if options.gcinfo then
-        local TableCreateHook;
-        TableCreateHook = hookfunction(getrenv().table.create, function(...)
-            local int, var = ...
-
-            if not checkcaller() and typeof(int) == "number" and int > 0 and int <= 2^26 and var then
-                gcinfo_ret += math.ceil(int/1000)
-            end
-
-            return TableCreateHook(...)
-        end)
-    end
-
-    -- gcinfo / collectgarbage spoof
-    task.spawn(function()
-        if not options.gcinfo then return end
-        local max, mini;
-
-        max = gcinfo() + math.random(math.floor(gcinfo()/5), math.floor(gcinfo()/2))
-        mini = gcinfo() - math.random(math.floor(gcinfo()/5), math.floor(gcinfo()/2))
-        gcinfo_ret = gcinfo()
-
-        local function decrease()
-            local maxfor = math.random(15, 22)
-                
-            for i = 1, maxfor do
-                gcinfo_ret = max - math.floor(((max - mini*1.25)*(i/maxfor))+math.random(-30,30))
-                task.wait(math.random(25,45)/1000)
-            end
-        end
-
-        local range1 = Stats.InstanceCount
-        local range2 = range1 + math.random(1000, 5000)
-
-        task.spawn(function()
+        Vc=Hg(29488)
+        repeat
             while true do
-                local delta = task.wait()
-                local prev = tick()
-                if gcinfo_ret > max + math.random(-75,75) then decrease() end
-
-                gcinfo_ret += math.floor(math.random(range1,range2)/15000)
-                repeat until tick()-prev > delta/2 -- wont freeze if the delta wait time is based on ur fps
-
-                gcinfo_ret += math.random(0, math.floor(math.random(range1,range2)/15000))
-                task.wait()
-
-                gcinfo_ret += math.floor(math.random(range1,range2)/20000)
-            end
-        end)
-
-        local h1; h1 = hookfunction(getrenv().gcinfo, function(...)
-            if not checkcaller() then
-                return gcinfo_ret
-            end
-
-            return h1(...)
-        end)
-
-        local h2; h2 = hookfunction(getrenv().collectgarbage, function(...)
-            local cnt = ...
-
-            if not checkcaller() and typeof(cnt) == "string" and string.split(cnt, "\0")[1] == "count" then
-                return gcinfo_ret
-            end
-
-            return h2(...)
-        end)
-    end)
-
-    -- memory spoof
-    task.spawn(function()
-        if not options.GetTotalMemoryUsageMb then return end
-        task.spawn(function()
-            local switchoff = false
-
-            while RunService.Heartbeat:Wait() do
-                switchoff = not switchoff
-                totalmem_ret += (math.random(-2,2)/(if switchoff then 32 else 64)) - (math.random(-1,1)/2)
-
-                task.wait(math.random(1,3)/90)
-            end
-        end)
-
-        local h1; h1 = hookmetamethod(game,"__namecall", function(...)
-            local self = ...
-            local method = string.gsub(getnamecallmethod(), "^%u", string.lower)
-
-            if not checkcaller() and typeof(self) == "Instance" and compareinstances(self, Stats) and method == "getTotalMemoryUsageMb" then
-                return totalmem_ret
-            end
-
-            return h1(...)
-        end)
-
-        local h2; h2 = hookfunction(Stats.GetTotalMemoryUsageMb, function(...)
-            local self = ...
-
-            if not checkcaller() and typeof(self) == "Instance" and compareinstances(self, Stats) then
-                return totalmem_ret
-            end
-
-            return h2(...)
-        end)
-    end)
-
-    -- memorytag spoof (spoofs gui in accordance to each device)
-    task.spawn(function()
-        if not options.GetMemoryUsageMbForTag then return end
-        local enum = Enum.DeveloperMemoryTag.Gui
-
-        local function isGui(item)
-            return
-                (typeof(item) == "EnumItem" and item == enum) or
-                (typeof(item) == "string" and string.split(item, "\0")[1] == "Gui")
-        end
-
-        task.spawn(function()
-            local switchoff = false
-
-            while RunService.Heartbeat:Wait() do
-                if math.random(1, 10) < 3 then
-                    switchoff = not switchoff
-                    memtag_ret += math.random(-2,2)/(if switchoff then 64 else 128) + (math.random(-1,1)/20)
-
-                    task.wait(math.random(1,3)/90)
-                end
-            end
-        end)
-
-        local h1; h1 = hookmetamethod(game,"__namecall", function(...)
-            local self, newenum = ...
-            local method = string.gsub(getnamecallmethod(), "^%u", string.lower)
-
-            if not checkcaller() and typeof(self) == "Instance" and compareinstances(self, Stats) and method == "getMemoryUsageMbForTag" and isGui(newenum) then
-                return memtag_ret
-            end
-
-            return h1(...)
-        end)
-
-        local h2; h2 = hookfunction(Stats.GetMemoryUsageMbForTag, function(...)
-            local self, arg = ...
-
-            if not checkcaller() and typeof(self) == "Instance" and compareinstances(self, Stats) and isGui(arg) then
-                return memtag_ret
-            end
-
-            return h2(...)
-        end)
-    end)
-
-    -- preloadasync spoof
-    task.spawn(function()
-        if not options.PreloadAsync then return end
-
-        local gametbl = {}
-        local coreguitbl = {}
-        local dextbl = {}
-
-        -- prevent GetAssetFetchStatus detection vectors on the dex model
-        -- in order to have fully-undetected status you MUST do AssetList[#AssetList + 1] = ContentIdYouWantToHide
-        local AssetList = AssetList or {"rbxassetid://17769765246"}
-        local AssetReturns = {}
-
-        for i, v in pairs(AssetList) do
-            AssetReturns[v] = ContentProvider:GetAssetFetchStatus(v)
-        end
-
-        setmetatable(AssetList, {__newindex = function(a, b, c) rawset(AssetList, b, c) rawset(AssetReturns, c, ContentProvider:GetAssetFetchStatus(c)) end})
-
-        ContentProvider:PreloadAsync({game}, function(a)
-            table.insert(gametbl,a)
-        end)
-        ContentProvider:PreloadAsync({CoreGui}, function(a)
-            table.insert(coreguitbl,a)
-        end)
-        ContentProvider:PreloadAsync({DexGui}, function(a)
-            table.insert(dextbl,a)
-        end)
-
-        --[[
-        -- commented out because preloadasyncing dexgui and directly comparing each assetid is probably more of a viable solution
-        -- it also does not matter if every dex image id is loaded in, well, the reason why is obvious
-        -- planning to make game.DescendantAdded checks soon
-
-        for i, v in pairs(gametbl) do
-            if table.find(badnews, v) and table.find(coreguitbl, v) then
-                table.remove(gametbl, i)
-            end
-        end
-        for i, v in pairs(coreguitbl) do
-            if table.find(badnews, v) then
-                table.remove(coreguitbl, i)
-            end
-        end
-
-        --]]
-
-        for i, v in pairs(dextbl) do
-            local find1, find2 = table.find(gametbl, v), table.find(coreguitbl, v);
-            if find1 then
-                table.remove(gametbl, find1)
-            end
-            if find2 then
-                table.remove(coreguitbl, find2)
-            end
-        end
-
-        table.clear(dextbl);
-        dextbl = nil;
-
-        local find = function(tbl, arg)
-            if type(tbl) ~= "table" then return false end
-
-            for _, v in ipairs(tbl) do
-                if rawequal(v, arg) then
+                if Vc==-3636700797438/1078819578 then
+                    return false
+                elseif Vc==1867815046-1867805003 then
                     return true
+                elseif Vc==-1111491719- -1111489792 then
+                    Xd={...}
+                    self=Xd[-197940000- -197940001]
+                    if db[wd('\\\196\161M\210\183','(\189\209')](self)==wd('\155{\207\227\179{\223\242','\210\21\188\151')and db[wd('\202|\127\220zg','\185\25\19')](wd('\242','\209'),...)>0/334311874 and db[wd('\26r4\ft,','i\23X')](wd('Q','r'),...)<1494247898+-1494239898 then
+                        Vc=Hg(1107)
+                        break
+                    end
+                    Vc=-1324419198- -1324415827
                 end
-
-                if typeof(v) == "Instance" and compareinstances(v, arg) then
+            end
+        until Vc==17070304337532/-1465765442
+    end,function(...)
+        local uc,zj,Gl,wa,self
+        zj,Gl={[-32489]=-1738,[30152]=17553,[3509]=17553,[20213]=1648},function(g)
+            return zj[g-30428]
+        end
+        uc=Gl(50641)
+        repeat
+            while true do
+                if uc==-2.0734891710846939e-06*838200664 then
                     return true
+                elseif uc==-8.95309372592914e-06*-1960551351 then
+                    return false
+                elseif uc==4.3881670423630852e-06*375555439 then
+                    wa={...}
+                    self=wa[332571876+-332571875]
+                    if db[wd('\230f\172\247p\186','\146\31\220')](self)==wd('\137c$\31\161c4\14','\192\rWk')and(cj(wa[-1684285188/-842142594])or db[wd('x\29\231i\v\241','\fd\151')](wa[-3.0317752052194995e-09*-659679516])==wd('\127\253Es\237Z','\17\136('))and db[wd('\244\138\226\226\140\250','\135\239\142')](wd('@','c'),...)>=1.5536583005429864e-09*1287284340 and db[wd('=\179\48+\181(','N\214\\')](wd('\134','\165'),...)<6.3416833763087414e-06*1261494705 then
+                        uc=Gl(-2061)
+                        break
+                    end
+                    uc=Gl(33937)
                 end
             end
-
-            return false
+        until uc==16182863281899/-1384215489
+    end,function(...)
+        local Qk,self,k,fh,Ub
+        Qk,k={[21582]=5238,[27937]=-9082,[3208]=-21268},function(od)
+            return Qk[od- -10948]
         end
-
-        local randomizeTable = function(t)
-            local n = #t
-            while n > 0 do
-                local k = math.random(n)
-                t[n], t[k] = t[k], t[n]
-                n -= 1
-            end
-            return t
-        end
-
-        local safecheck = function(tbl)
-            for i, v in ipairs(tbl) do
-                if type(v) ~= "string" and typeof(v) ~= "Instance" then
+        Ub=k(-7740)
+        repeat
+            while true do
+                if Ub==-10033752449084/471776963 then
+                    fh={...}
+                    self=fh[-1928918348/-1928918348]
+                    if db[wd('\220\136\159\205\158\137','\168\241\239')](self)==wd('\a2z\156/2j\141','N\\\t\232')and cj(fh[-1833902215+1833902217])and db[wd('\197\253I\211\251Q','\182\152%')](wd('\31','<'),...)>=-3874446906/-1291482302 and db[wd('A\179.W\181\54','2\214B')](wd('\235','\200'),...)<-1053183747+1053191747 then
+                        Ub=k(16989)
+                        break
+                    end
+                    Ub=1090651986+-1090646748
+                elseif Ub==-10284172787696/1132368728 then
+                    return true
+                elseif Ub==-1429545135- -1429550373 then
                     return false
                 end
             end
-            return true
+        until Ub==-888844620213/75026979
+    end,Mi,me,Si
+    if not(tb[wd(wd('\164\142\24@\137\142\25I','Hu\227\159'),wd('\159\131\171\163','=\25'))])then
+    else
+        local Bm,j,dg
+        dg,Bm={[18940]=-24328,[-5007]=-27717},function(Jl)
+            return dg[Jl+-20475]
         end
-
-        local h1; h1 = hookmetamethod(game,"__namecall", function(...)
-            local self, tbl, fnc = ...
-            local method = string.gsub(getnamecallmethod(), "^%u", string.lower)
-
-            if not checkcaller() and typeof(self) == "Instance" and compareinstances(self, ContentProvider) then
-                if method == "preloadAsync" and type(tbl) == "table" and (find(tbl, game) or find(tbl,CoreGui)) and safecheck(tbl) then
-                    local targettbl = {}
-
-                    for _, v in ipairs(tbl) do
-                        if typeof(v) == "Instance" then
-                            if compareinstances(v, game) then
-                                for _, v2 in pairs(randomizeTable(gametbl)) do
-                                    table.insert(targettbl,v2)
-                                end
-                            elseif compareinstances(v, CoreGui) then
-                                for _, v2 in pairs(randomizeTable(coreguitbl)) do
-                                    table.insert(targettbl,v2)
-                                end
-                            else
-                                table.insert(targettbl, v)
-                            end
-                        elseif typeof(v) == "string" then
-                            table.insert(targettbl, v)
+        j=Bm(15468)
+        repeat
+            while true do
+                if j==-2065117909- -2065090192 then
+                    be(db[wd('\173\0\167\4','\202a')],wd('\2\a\140\252\236\56;\131\241\237',']X\226\157\129'),function(...)
+                        local xg={...}
+                        if not ce(...)then
+                            return Qf(...)
                         end
-                    end
-
-                    return h1(self, targettbl, fnc)
-                elseif method == "getAssetFetchStatus" and type(tbl) == "string" then
-                    local str = string.split(tbl, "\0")[1] -- lol
-                    if tonumber(str) then
-                        str = "rbxassetid://" .. str
-                    end
-
-                    if table.find(AssetList, str) then
-                        return AssetReturns[str] or Enum.AssetFetchStatus.None
-                    end
+                        return Mi(...)
+                    end)
+                    j=Bm(39415)
+                    break
                 end
             end
-
-            return h1(...)
-        end)
-
-        local h2; h2 = hookfunction(ContentProvider.PreloadAsync, function(...)
-            local self, tbl, fnc = ...
-
-            if not checkcaller() and typeof(self) == "Instance" and compareinstances(self, ContentProvider) and type(tbl) == "table" and (find(tbl,game) or find(tbl,CoreGui)) and safecheck(tbl) then
-                local targettbl = {}
-
-                for _, v in ipairs(tbl) do
-                    if typeof(v) == "Instance" then
-                        if compareinstances(v, game) then
-                            for _, v2 in pairs(randomizeTable(gametbl)) do
-                                table.insert(targettbl,v2)
-                            end
-                        elseif compareinstances(v, CoreGui) then
-                            for _, v2 in pairs(randomizeTable(coreguitbl)) do
-                                table.insert(targettbl,v2)
-                            end
+        until j==12385748333304/-509114943
+    end
+    if tb[wd('\239-\194&\222','\166C')]then
+        local Fk,ye,oe
+        ye,oe={[-1963]=-24318,[-421]=-3076},function(fm)
+            return ye[fm+20197]
+        end
+        Fk=oe(-20618)
+        repeat
+            while true do
+                if Fk==-2.2673597962959143e-06*1356643972 then
+                    be(db[wd('W\130]\134','0\227')],wd('\147N\23\162u\27\180','\204\17~'),function(...)
+                        local cf={...}
+                        if not(not Ia(...))then
                         else
-                            table.insert(targettbl, v)
+                            return Jd(...)
                         end
-                    elseif typeof(v) == "string" then
-                        table.insert(targettbl, v)
-                    end
-                end
-
-                return h2(self, targettbl, fnc)
-            end
-
-            return h2(...)
-        end)
-
-        local h3; h3 = hookfunction(ContentProvider.GetAssetFetchStatus, function(...)
-            local self, str = ...
-
-            if not checkcaller() and typeof(self) == "Instance" and compareinstances(self, ContentProvider) and type(str) == "string" then
-                str = string.split(str, "\0")[1]
-                if tonumber(str) then
-                    str = "rbxassetid://" .. str
-                end
-
-                if table.find(AssetList, str) then
-                    return Enum.AssetFetchStatus.None
+                        return me(...)
+                    end)
+                    Fk=oe(-22160)
+                    break
                 end
             end
-
-            return h3(...)
-        end)
-
-        --[[local templist = {} -- commented out cuz it SUCKS!!!
-
-        for _, asset in pairs(AssetList) do
-            for i, v in next, getconnections(ContentProvider:GetAssetFetchStatusChangedSignal(asset)) do
-                v:Disable() -- if your executor is competent then a .Connected check should not detect this
-                -- but we're still going to check for your executor's competency anyways :)
-                            
-                if select(2, pcall(function() return v.Connected end)) == false then
-                    v:Enable() -- since .Connected checks do detect this we will re-enable it
-                    -- now we will resort to hooking the function connected to the signal
-
-                    -- lotta hacky checks here but we should never have to come to this if statement in the first place so whatever
-                    if (not table.find(templist, v.Function)) and not (iscclosure(v.Function) or isourclosure(v.Function)) then
-                        table.insert(templist, v.Function)
-                        -- yeah go ahead and detect this
-                        hookfunction(v.Function, function()end)
-                    end
-                end
-            end
+        until Fk==694809609-694833927
+    end
+    if tb[wd('=\t\224f\29\b\242w','sl\151\15')]then
+        local zm,Ae,Fg
+        Ae,zm={[21938]=314,[-2652]=-31392},function(Mh)
+            return Ae[Mh- -8569]
         end
-
-        table.clear(templist)]]
-    end)
-
-    -- instancecount bypass
-    task.spawn(function()
-        if not (options.InstanceCount or options.UI2DDrawcallCount or options.UI2DTriangleCount) then return end
-        local h1; h1 = hookmetamethod(game,"__index", function(...)
-            local self, arg = ...
-
-            if not checkcaller() and typeof(self) == "Instance" and compareinstances(self, Stats) and type(arg) == "string" and #arg < 256 then
-                arg = --[[string.split(]]string.gsub(arg, "^%l", string.upper)--, "\0")[1]
-                local res = h1(...)
-
-                if typeof(res) == "number" then -- double check just in case
-                    if options.InstanceCount and arg == "InstanceCount" then return inscount_ret end
-                    if options.UI2DDrawcallCount and arg == "UI2DDrawcallCount" then return drawcall_ret end
-                    if options.UI2DTriangleCount and arg == "UI2DTriangleCount" then return triangle_ret end
-                end
-
-                return res
-            end
-
-            return h1(...)
-        end)
-    end)
-
-    -- forked textbox bypass
-    task.spawn(function()
-        if not options.GetFocusedTextBox then return end
-        local h1; h1 = hookmetamethod(game, "__namecall", function(...)
-            local method = string.gsub(getnamecallmethod(), "^%u", string.lower);
-            local self = ...
-
-            if not checkcaller() then
-                if typeof(self) == "Instance" and compareinstances(self, UserInputService) and method == "getFocusedTextBox" then
-                    local Textbox = h1(...)
-
-                    if typeof(Textbox) == "Instance" then
-                        local _,err = pcall(IsDescendantOf, Textbox, DexGui)
-
-                        if err and (type(err) == "boolean" and err == true) or (type(err) == "string" and err:lower():match("the current")) then
-                            return nil
+        Fg=zm(-11221)
+        repeat
+            while true do
+                if Fg==-1778502026- -1778470634 then
+                    be(db[wd('\188\19\182\23','\219r')],wd('\148\232a\132C\162\217k\132L','\203\183\15\225\52'),function(...)
+                        local de={...}
+                        if not Qg(...)then
+                            return xi(...)
                         end
-                    end
-
-                    return Textbox
+                        return Si(...)
+                    end)
+                    Fg=zm(13369)
+                    break
                 end
             end
-
-
-            return h1(...)
+        until Fg==1990960270-1990959956
+    end
+    db[wd('zdrzdhk','\29\1\6')]()[wd("1\247\136\131Z\159c2\a\'\226\143\139W\132d6\14",'B\150\238\230\50\240\fYj')]=db[wd('\163\204a*y\161\198e<h\168','\205\169\22I\26')](function(...)
+        local Zg,hm,Zh,tg,v,W,Sa,Ja,kg
+        Zg,W={[2009]=-31098,[7720]=15238,[2841]=-5579,[17963]=-18344,[26537]=9884,[18290]=10631,[22543]=10631,[-6248]=-1061,[7973]=-5579,[10270]=-21052,[-19382]=15710,[-20010]=-6305,[-7477]=-21052,[-4731]=15238,[-3581]=-21052,[-15574]=-10447,[-5369]=28002},function(L)
+            return Zg[L+21085]
+        end
+        hm=W(-26454)
+        repeat
+            while true do
+                if hm==1388824557-1388855655 then
+                    Sa=Si
+                    Si=lc(v)
+                    return Sa
+                elseif hm==1605824807152/-1513501232 then
+                    if not(Zh==wd(wd('\161ko\3w\151Ze\3x','le\14\139\184'),wd('\238js\214\196','|;')))then
+                        hm=W(-40467)
+                        break
+                    else
+                        hm=W(-19076)
+                        break
+                    end
+                    hm=-1249175498- -1249186129
+                elseif hm==-4.7719602650648958e-06*-2071266199 then
+                    tg=me
+                    me=lc(v)
+                    return tg
+                elseif hm==-15852148492970/-1491124870 then
+                    hm=W(-24666)
+                elseif hm==121229201+-121247545 then
+                    kg=Mi
+                    Mi=lc(v)
+                    return kg
+                elseif hm==-1746199706- -1746189259 then
+                    if not(Zh==wd(wd('1W\152\0l\148\22','\232V\206'),wd('\207\23v','I')))then
+                        hm=W(-27333)
+                        break
+                    else
+                        hm=W(5452)
+                        break
+                    end
+                    hm=W(-10815)
+                elseif hm==-681676417+681655365 then
+                    hm=W(-13365)
+                elseif hm==6399503898214/-1147070066 then
+                    if not(Zh==wd(wd('\218\131\138\137\165\224\191\133\132\164','\137\198j[)'),wd('\142u\f\220c','\130o')))then
+                        hm=W(-36659)
+                        break
+                    else
+                        hm=W(-3122)
+                        break
+                    end
+                    hm=571706743+-571691505
+                elseif hm==1753169304-1753175609 then
+                    return be(...)
+                elseif hm==-478533720- -478549430 then
+                    hm=W(1458);
+                elseif hm==2048143886+-2048115884 then
+                    Ja,Zh,v=...
+                    if db[wd('*\130\159;\148\137','^\251\239')](Ja)~=wd('8\23*5\16\23:$','qyYA')then
+                        hm=W(-41095)
+                        break
+                    end
+                    hm=W(-13112)
+                elseif hm==3193776290202/209592879 then
+                    return be(...)
+                end
+            end
+        until hm==1823658233-1823666116
+    end)
+    if not(not ra)then
+    else
+        db[wd('jW\244jW\238{','\r2\128')]()[wd('\194Frpq\208\248\203Dxot\218\232','\170)\29\27\28\181\140')]=db[wd('\163~\202\191v\204\199\171\54\181k\205\183{\215\192\175?','\208\31\172\218\30\163\168\192[')]
+    end
+end
+do
+    db[wd('\\\241[\251','(\144')][wd('\212\20\198\19\201','\167d')](function()
+        repeat
+            db[wd('\247+\240!','\131J')][wd('\245#\235\54','\130B')]()
+        until db[wd('\200\250\194\254','\175\155')]['IsLoaded'](db[wd('\200\250\194\254','\175\155')])
+        local Bj,_c,Pi,sl,hj,Ig,Eg,Fc,Zl=1.2963601833267976e-07*1542781108,{-(-3.9607988175494583e-07*-504948646),-68148047000/-340740235},{1.9481718264016973e-10*513301746,2110244673/2110244673},db[wd('\18\164\v\173','\127\197')][wd('h\130a\129|','\14\238')],db[wd('\144\193\137\200','\253\160')][wd('\247\251\231','\148')],db[wd('Q\bH\1','<i')][wd('\152\130\133','\235')],db[wd('\202\223\211\214','\167\190')][wd('\201\156\199\140','\168\255')],db[wd('\131\170\154\163','\238\203')][wd('\6\31','v')],-0/-174133990
+        while db[wd('\254\168\249\162','\138\201')][wd('=\v#\30','Jj')]()do
+            if db[wd('U\18\195\\\23\197','2q\170')]()>=Zl then
+                Zl=db[wd('\24\192\173\17\197\171','\127\163\196')]()
+            else
+                break
+            end
+        end;
+        db[wd('\145\2\150\b','\229c')][wd('\226\230\252\243','\149\135')](-2.918794107180807e-10*-1027821727)
+        local Y,Mc=db[wd('f@\189oE\187','\1#\212')]()+Bj,-0/-1162856452
+        local function nl()
+            local ga=((Eg(hj(Fc*(Mc)))/Fc*(Bj*(-1095455278/-547727639)))+-Bj)
+            return sl(Y+ga);
+        end
+        local d;
+        d=db[wd('\196\141\186G\219\96\194\129\161E\210{','\172\226\213,\189\21')](db[wd('\243\53\245\230\53\239\226','\148P\129')]()[wd('\24\4\194\17\1\196','\127g\171')],function(...)
+            return nl();
         end)
-
-        local h2; h2 = hookfunction(UserInputService.GetFocusedTextBox, function(...)
-            local self = ...
-
-            if not checkcaller() then
-                if typeof(self) == "Instance" and compareinstances(self, UserInputService) then
-                    local Textbox = h2(...)
-
-                    if typeof(Textbox) == "Instance" then
-                        local _,err = pcall(IsDescendantOf, Textbox, DexGui)
-
-                        if err and (type(err) == "boolean" and err == true) or (type(err) == "string" and err:lower():match("the current")) then
-                            return nil
+        local td;
+        td=db[wd('\245\174(\b\171\131\243\162\51\n\162\152','\157\193Gc\205\246')](db[wd('%s\a0s\29\52','B\22s')]()[wd('\185x\207\134GF\227\189v\209\136CB\242','\218\23\163\234\"%\151')],function(ba,...)
+            local l,hh,Vf,Xg,Fl
+            Vf,Fl={[-1131]=-27718,[344]=-28106,[25985]=-27718,[-16987]=20952},function(ah)
+                return Vf[ah+-13392]
+            end
+            hh=Fl(-3595)
+            repeat
+                while true do
+                    if hh==-1160851522038/41302623 then
+                        return nl();
+                    elseif hh==-1458031878+1458004160 then
+                        return td(ba,...);
+                    elseif hh==14072893596936/671673043 then
+                        Xg,l=db[wd('\213\50\196=\201','\165Q')](td,ba,...)
+                        if Xg and ba==wd("\'\132\49\133\48",'D\235')then
+                            hh=Fl(13736)
+                            break
                         end
+                        hh=Fl(12261)
                     end
-
-                    return Textbox
                 end
+            until hh==-1.3336684327830116e-05*-1671479916
+        end);
+        db[wd('\208\30\218\26','\183\127')]['GetService'](db[wd('\208\30\218\26','\183\127')],wd('\152.\162\156\220\184-\165\172\220','\202[\204\207\185'))[wd('\242\150u\209\146u\197','\161\226\16')]['Connect'](db[wd('\208\30\218\26','\183\127')]['GetService'](db[wd('\208\30\218\26','\183\127')],wd('\152.\162\156\220\184-\165\172\220','\202[\204\207\185'))[wd('\242\150u\209\146u\197','\161\226\16')],function()
+            local ue,lh,Kb,Hf
+            Hf,Kb={[-19654]=25215,[4369]=-30094,[3731]=31371,[8032]=-28315,[20863]=-28315,[29234]=-28315,[25360]=-23010},function(Ch)
+                return Hf[Ch-32519]
             end
-
-
-            return h2(...)
+            lh=Kb(57879)
+            repeat
+                while true do
+                    if lh==-1.0766755791072965e-05*2137134012 then
+                        ue=((Eg(hj(Fc*(Mc)))/Fc*(Bj*(1917871446+-1917871444)))+-Bj)
+                        if ue>((Eg(hj(Fc*(Mc)+6587549.6900000004/658754969))/Fc*(Bj*(280321955-280321953)))+-Bj)then
+                            lh=Kb(36250)
+                            break
+                        else
+                            lh=Kb(36888)
+                            break
+                        end
+                        lh=Kb(53382)
+                    elseif lh==1419367201+-1419335830 then
+                        Mc=Mc+116459392.14000002/1663705602
+                        lh=Kb(61753)
+                    elseif lh==-1331436688- -1331406594 then
+                        Mc=Mc+2.106779515777712e-11*474658118
+                        lh=Kb(40551)
+                    elseif lh==1023643006-1023671321 then
+                        lh=Kb(12865);
+                        break;
+                    end
+                end
+            until lh==-483908344- -483933559
+        end)
+        local _k=Bj
+        for Na,Mb in db[wd('C\146U\131','-\247')],Pi do
+            Pi[Na]=Mb*(128758487-128748487)
+        end
+        local Qh=db[wd('\5\219\28\210','h\186')][wd('\225\136\135\247\134\132','\147\233\233')](Pi[7.0448947762081987e-10*1419467617],Pi[-3010675118/-1505337559])/(-4.718426573091334e-06*-2119350560)
+        while db[wd('\253\238\227\251','\138\143')](Pi)do
+            Bj=db[wd('B\133[\140','/\228')][wd('^\172\183H\162\180',',\205\217')](_k+_c[-2081461590- -2081461591],_k+_c[1248661448+-1248661446])
+            Qh=db[wd('I\137P\128','$\232')][wd('\192#\18\214-\17','\178B|')](Pi[-959154718+959154719],Pi[-1247807085- -1247807087])/(-9.3285518199155229e-06*-1071977751)
+        end
+    end);
+    db[wd('<\180;\190','H\213')][wd('\218R\200U\199','\169\"')](function()
+        repeat
+            db[wd('\197o\194e','\177\14')][wd('\30\230\0\243','i\135')]()
+        until db[wd('\132\197\142\193','\227\164')]['IsLoaded'](db[wd('\132\197\142\193','\227\164')])
+        local kk,ef=db[wd('a\239\128\0g\241\138\b','\2\131\239n')](db[wd('IhCl','.\t')]['GetService'](db[wd('IhCl','.\t')],wd('{\31z\144\169[\28}\160\169',')j\20\195\204'))),db[wd('R\127)XTa#P','1\19F6')](db[wd('9}3y','^\28')]['GetService'](db[wd('9}3y','^\28')],wd('\22\\$\\6','E(')))
+        local th,Nk=ef['GetTotalMemoryUsageMb'](ef),-405015660+405015660;
+        kk[wd("\4\246\31\'\242\31\51",'W\130z')]['Connect'](kk[wd("\4\246\31\'\242\31\51",'W\130z')],function()
+            local ee=db[wd('\129P\\\183^_','\211\49\50')][wd('AJX','/')]()
+            Nk=ee['NextNumber'](ee,-(14826891790/1482689179),1572029076+-1572029066);
+        end)
+        local function di()
+            return th+Nk;
+        end
+        local Mg
+        Mg=db[wd('\1\229\242A\211\24\0\b\231\248^\214\18\16','i\138\157*\190}t')](db[wd('\31\216\21\220','x\185')],wd('\215=\214s\153\237\1\217~\152','\136b\184\18\244'),function(self,...)
+            local am,Zd,Am,Zk
+            Zd,Am={[-15985]=-29521,[5364]=14399,[-29883]=23315,[-11044]=-3558,[-18828]=-17006,[-4891]=23315,[12530]=-22453},function(rm)
+                return Zd[rm- -15875]
+            end
+            Zk=Am(-3345)
+            repeat
+                while true do
+                    if Zk==1037020752+-1037043205 then
+                        am=db[wd('5c\235\178J\\\252-3j\243\177NE\241!6','R\6\159\220+1\153N')]()
+                        if not(not db[wd(wd("6\171\178\192\50\54\162\187\207<\'",'a\183\157\148V'),wd('\4\195z\128?','0\183'))]())then
+                            Zk=Am(-34703)
+                            break
+                        else
+                            Zk=Am(-10511)
+                            break
+                        end
+                        Zk=-3.2168915452534668e-05*-724767984
+                    elseif Zk==3769835456820/-1059537790 then
+                        return di();
+                    elseif Zk==-1.2316872893519868e-05*1380707599 then
+                        Zk=Am(-45758);
+                    elseif Zk==3551241165703/246631097 then
+                        if db[wd("\172\222\'\189\200\49",'\216\167W')](self)==wd('\18\127\224\172:\127\240\189','[\17\147\216')and(am==wd('7\210\25\249a\184=\\\234X\29\216\31\212[\191=W\194p\18','p\183m\173\14\204\\0\167=')or am==wd('\225\163FPY_\5\148\210\49\235\169@}cX\5\159\250\25\228','\134\198\50\4\54+d\248\159T'))and self[wd('+\26\163\53\27\56\163+\r','hv\194F')]==wd(';\141\t\141\27','h\249')then
+                            Zk=Am(-26919)
+                            break
+                        end
+                        Zk=-1295016115+1294986594
+                    elseif Zk==-1455600391- -1455623706 then
+                        return Mg(self,...)
+                    elseif Zk==-1681617346- -1681587825 then
+                        Zk=Am(-20766)
+                    end
+                end
+            until Zk==0.00011466274582150016*221885494
+        end)
+        local xk;
+        xk=db[wd(']R)\30\225\190[^2\28\232\165','5=Fu\135\203')](ef[wd('9\49ei\vqD$\199\182\19;cD1vD/\239\158\28','~T\17=d\5%H\138\211')],function(self,...)
+            local X,ql,ca
+            X,ca={[-12175]=-32073,[-19994]=18067,[-27699]=18067,[23436]=4997,[-14877]=15995,[-2459]=-8526,[-2074]=-22477},function(na)
+                return X[na+-14347]
+            end
+            ql=ca(12273)
+            repeat
+                while true do
+                    if ql==-1745756199- -1745774266 then
+                        ql=ca(-530)
+                    elseif ql==-1362487966+1362503961 then
+                        ql=ca(11888);
+                        break;
+                    elseif ql==8634781630634/1727993122 then
+                        return di();
+                    elseif ql==-33642560112070/1496754910 then
+                        if not db[wd('\20\249\213z\137\20\240\220u\135\5','w\145\176\25\226')]()then
+                            ql=ca(2172)
+                            break
+                        end
+                        ql=7182350989695/449037261
+                    elseif ql==-1040981794+1040949721 then
+                        if db[wd('\17\151\224\0\129\246','e\238\144')](self)==wd('\18\170\212\27:\170\196\n','[\196\167o')and self[wd('\226\220\145;\210\254\145%\196','\161\176\240H')]==wd('-a\31a\r','~\21')then
+                            ql=ca(37783)
+                            break
+                        end
+                        ql=ca(-5647)
+                    end
+                end
+            until ql==-618104474+618095948
+        end)
+    end);
+    db[wd('\26\141\29\135','n\236')][wd('\203\4\217\3\214','\184t')](function()
+        repeat
+            db[wd('\227\173\228\167','\151\204')][wd('\192q\222d','\183\16')]()
+        until db[wd('\n$\0 ','mE')]['IsLoaded'](db[wd('\n$\0 ','mE')])
+        local Ti,jj=db[wd('D. {B0*s',"\'BO\21")](db[wd('\24\223\18\219','\127\190')]['GetService'](db[wd('\24\223\18\219','\127\190')],wd('\22\135\187\178\54\54\132\188\130\54','D\242\213\225S'))),db[wd('9\234\175\150?\244\165\158','Z\134\192\248')](db[wd('\197\192\207\196','\162\161')]['GetService'](db[wd('\197\192\207\196','\162\161')],wd('kIYIK','8=')))
+        local xb,Te=jj['GetMemoryUsageMbForTag'](jj,db[wd('\249~\201}','\188\16')][wd('g\243fCz0\252\187\254n\243}Id&\216\191\235','#\150\16&\22_\140\222\140')][wd('\229\215\203','\162')]),-1491017319+1491017319;
+        Ti[wd('J\2;i\6;}','\25v^')]['Connect'](Ti[wd('J\2;i\6;}','\25v^')],function()
+            local Pd=db[wd('\208\14h\230\0k','\130o\6')][wd('\14\5\23','\96')]()
+            Te=Pd['NextNumber'](Pd,-(-207064629.80000001/-2070646298),133405945.80000001/1334059458);
+        end)
+        local function Sh()
+            return xb+Te;
+        end
+        local em
+        em=db[wd('\1[5\51\\\5\1\bY?,Y\15\17','i4ZX1\96u')](db[wd('4\235>\239','S\138')],wd('\242\221\130\157\96\200\225\141\144a','\173\130\236\252\r'),function(self,...)
+            local Nb,Jk,Pe,ma
+            Pe,ma={[31210]=-22968,[-27852]=-22968,[24265]=509,[-13947]=26482,[20867]=-13172,[-21780]=17506,[4912]=-5061},function(ij)
+                return Pe[ij+29722]
+            end
+            Nb=ma(-24810)
+            repeat
+                while true do
+                    if Nb==-26924012752824/1172240193 then
+                        return em(self,...)
+                    elseif Nb==-6.066319856642781e-06*834278462 then
+                        Jk=db[wd('MB\193\225\240B\243\153KK\217\226\244[\254\149N',"*\'\181\143\145/\150\250")]()
+                        if not(not db[wd(wd('\194b\197T\162\194k\204[\172\211',';\188.Y\29'),wd('\234\171\254s\164','p\29'))]())then
+                            Nb=ma(-43669)
+                            break
+                        else
+                            Nb=ma(-51502)
+                            break
+                        end
+                        Nb=-5.0653065956775677e-05*453437508
+                    elseif Nb==1826872251+-1826885423 then
+                        return Sh();
+                    elseif Nb==-487665835- -487692317 then
+                        Nb=ma(-57574);
+                    elseif Nb==376935713+-376918207 then
+                        if db[wd('g%Jv3\\','\19\\:')](self)==wd('\143_9\193\167_)\208','\198\49J\181')and(Jk==wd('\238WH\20Ag\197\218\210mU\200UY\20FL\197\218\255YA','\169\50<Y$\n\170\168\171\56&')or Jk==wd('/\247\138\172\173\31a\242\158\223\138)\245\155\172\170\52a\242\179\235\158','H\146\254\225\200r\14\128\231\138\249'))and self[wd('\131\170k\187\179\136k\165\165','\192\198\n\200')]==wd('\231\140\213\140\199','\180\248')then
+                            Nb=ma(-8855)
+                            break
+                        end
+                        Nb=-631956273+631956782
+                    elseif Nb==-8.8885786870002511e-07*-572644984 then
+                        Nb=ma(1488)
+                    end
+                end
+            until Nb==44438840649684/1840956156
+        end)
+        local zf;
+        zf=db[wd('\132\160N\224\167\v\130\172U\226\174\16','\236\207!\139\193~')](jj[wd('\214\192x\191\169\235\131\f\179\186I\240\194i\191\174\192\131\f\158\142]','\145\165\f\242\204\134\236~\202\239:')],function(self,...)
+            local Ad,xd,xl
+            Ad,xl={[1660]=-6375,[-31593]=10402,[2861]=8937,[16]=17482,[-5620]=25282,[-18972]=-6774,[13906]=-6375,[-3473]=10402,[-29343]=10402,[-23210]=12497,[-24932]=-8081},function(We)
+                return Ad[We+14769]
+            end
+            xd=xl(-39701)
+            repeat
+                while true do
+                    if xd==2.4776615402977622e-05*-326154314 then
+                        if not(not db[wd(wd('\2\202\4_\219\2\195\rP\213\19','\r\159\1kC'),wd('<T0>\163','Pi'))]())then
+                            xd=xl(-20389)
+                            break
+                        else
+                            xd=xl(-37979)
+                            break
+                        end
+                        xd=-1.0549095809611879e-05*604317196
+                    elseif xd==-810278500+810288902 then
+                        xd=xl(-863)
+                    elseif xd==-1649109725+1649118662 then
+                        return Sh();
+                    elseif xd==-3.6002184107653963e-06*1770725904 then
+                        xd=xl(-33741);
+                        break;
+                    elseif xd==-26561327095780/-1050602290 then
+                        xd=xl(-13109);
+                    elseif xd==-9.0132015859490171e-06*-1386521746 then
+                        if not(db[wd(wd('\176&[\161\48M','\"p\243'),wd('\212\29\234','2'))](self)==wd(wd('\165k\160\127\141k\176n','\210\96\138\f'),wd('\141~\234\28','\179\27'))and self[wd(wd('\187\228D\220\139\198D\194\157','R\143\200\"'),wd('\221\22\154\156','w\17'))]==wd(wd('\254\215\204\215\222','\195\151'),wd('~$','\16')))then
+                            xd=xl(-14753)
+                            break
+                        else
+                            xd=xl(-11908)
+                            break
+                        end
+                        xd=xl(-46362)
+                    elseif xd==36003165481050/2059442025 then
+                        xd=xl(-18242);
+                    end
+                end
+            until xd==-662375166390/97781985
         end)
     end)
-
-    -- guiobjects circumnav. (you do a setcore to detect this and i kill you)
-    task.spawn(function()
-        if not options.GuiObjects then return end
-        local doobityVisible = true
-
-        task.spawn(function() -- randomly auto set doobityVisible to true
-            while task.wait(math.random()*3) do
-                doobityVisible = true
-            end
-        end)
-
-        local h1; h1 = hookmetamethod(game, "__namecall", function(...)
-            local self, arg1, arg2 = ...
-            local method = string.gsub(getnamecallmethod(), "^%u", string.lower)
-
-            if not checkcaller() and typeof(self) == "Instance" and compareinstances(self, StarterGui) and rawequal(arg1, "DevConsoleVisible") then
-                if method == "getCore" then
-                    return doobityVisible
-                elseif method == "setCore" and rawequal(arg2, false) then
-                    doobityVisible = false
+    local ze,gi=db[wd('\25\205!\143\31\211+\135','z\161N\225')](db[wd('<\236\54\232','[\141')]['GetService'](db[wd('<\236\54\232','[\141')],wd('V\220\199\173\53\214\243E\193\198\175\57\220\226g','\21\179\169\217P\184\135'))),db[wd('\218n\164H\220p\174@','\185\2\203&')](db[wd('5\232?\236','R\137')]['GetService'](db[wd('5\232?\236','R\137')],wd('\213\137\135\243\161\128\255','\150\230\245')));
+    local sf;
+    local Oj;
+    local vi={};
+    db[wd('v\242|\246','\17\147')]['GetService'](db[wd('v\242|\246','\17\147')],wd('\15\152D\4\241\164\182\28\133E\6\253\174\167>','L\247*p\148\202\194'))['PreloadAsync'](db[wd('v\242|\246','\17\147')]['GetService'](db[wd('v\242|\246','\17\147')],wd('\15\152D\4\241\164\182\28\133E\6\253\174\167>','L\247*p\148\202\194')),{gi},function(ji)
+        local Ki,uh,N
+        N,uh={[-23642]=-9233,[-29342]=-15025,[-18178]=6244,[-13441]=6244,[15431]=30900,[11327]=10105},function(qi)
+            return N[qi+30184]
+        end
+        Ki=uh(-18857)
+        repeat
+            while true do
+                if Ki==-1047729175+1047739280 then
+                    if not(not ji['find'](ji,wd(wd('\183j\208\208sD\160|\193\213:\24\234','db\192\188\53\171'),wd('j\a\171\198X_','\203m\195'))))then
+                        Ki=uh(-14753)
+                        break
+                    else
+                        Ki=uh(-53826)
+                        break
+                    end
+                    Ki=-3.3951394841673233e-06*-1839099698
+                elseif Ki==-6143256981232/-983865628 then
+                    Ki=uh(-59526);
+                    break;
+                elseif Ki==-221586167- -221617067 then
+                    Ki=uh(-43625);
+                elseif Ki==7.5837857458256432e-06*-1217465829 then
+                    db[wd('\188\137\170\132\173','\200\232')][wd('|\146\208p\142\215','\21\252\163')](vi,ji);
+                    Ki=uh(-48362);
                 end
             end
-
-            return h1(...)
-        end)
-
-        local h2; h2 = hookfunction(StarterGui.GetCore, function(...)
-            local self, arg = ...
-
-            if not checkcaller() and typeof(self) == "Instance" and compareinstances(self, StarterGui) and rawequal(arg, "DevConsoleVisible") then
-                return doobityVisible
-            end
-
-            return h2(...)
-        end)
-
-        local h3; h3 = hookfunction(StarterGui.SetCore, function(...)
-            local self, arg1, arg2 = ...
-
-            if not checkcaller() and typeof(self) == "Instance" and compareinstances(self, StarterGui) and rawequal(arg1, "DevConsoleVisible") and rawequal(arg2, false) then
-                doobityVisible = false
-            end
-
-            return h3(...)
-        end)
+        until Ki==-1.6462602455485743e-05*912674654
     end)
-
-    -- weaktable bypass
-    task.spawn(function()
-        if not options.Weaktable then return end
-        local wrap = coroutine.wrap
-        local remove = table.remove
-        local isreadonly = isreadonly or table.isfrozen
-
-        -- this exists so pcalling (ouch) c functions will not actually succeed (for the most part, stuff like gcinfo will succeed but will realistically not have a datamodel effect)
-        local ReassuranceFunction = function() error("", 0) end
-        local ReassuranceTable = setmetatable({}, {
-            __eq = ReassuranceFunction,
-            __tostring = ReassuranceFunction,
-            __iter = ReassuranceFunction,
-            __index = ReassuranceFunction,
-            __newindex = ReassuranceFunction,
-            __metatable = "The metatable is locked" -- for fun
-        })
-                    
-        --[[
-        local list;
-        local folder = Instance.new("Folder")
-        folder.Name = tostring(math.random())
-
-        -- this was intended to check an actual cache list but because i dont really have a proper executor at my disposal i cant properly test this smh
-        for firstkey, host in pairs(getreg()) do
-            if typeof(firstkey) == "userdata" and typeof(host) == "table" then
-                for key, ins in pairs(host) do
-                    if (typeof(key) == "userdata" and typeof(ins) == "Instance") or ins == folder then
-                        list = host
+    local Cf={}
+    for Dj,id in db[wd('\200\151\209\132\203','\184\246')](db[wd('\185;\179?','\222Z')]['GetDescendants'](db[wd('\185;\179?','\222Z')]))do
+        local Zi,Vj,zl
+        zl,Vj={[5617]=8734,[23145]=6852,[-22888]=5242,[-28220]=-248,[29248]=-20839,[-6013]=154,[-5930]=6852,[-5054]=6852,[20838]=5242,[-20566]=28663},function(B)
+            return zl[B-6870]
+        end
+        Zi=Vj(-13696)
+        repeat
+            while true do
+                if Zi==416975306+-416968454 then
+                    Zi=Vj(-16018)
+                elseif Zi==795287390+-795287638 then
+                    if id[wd('z\241R\251V','3\156')]['find'](id[wd('z\241R\251V','3\156')],wd('\14\241\19\206\145\23\25\231\2\203\216KS','|\147k\175\226d'))and id['IsDescendantOf'](id,gi)then
+                        Zi=Vj(857)
+                        break
+                    else
+                        Zi=Vj(12487)
+                        break
+                    end
+                    Zi=Vj(940)
+                elseif Zi==5740209825859/200265493 then
+                    if id['IsA'](id,wd('\231\217\247\229\209\226\213\244\231\216','\174\180\150\130\180'))then
+                        Zi=Vj(-21350)
+                        break
+                    end
+                    Zi=Vj(27708)
+                elseif Zi==4345388793550/828956275 then
+                    Zi=Vj(36118);
+                    break;
+                elseif Zi==-162094757594/-1052563361 then
+                    Zi=Vj(1816);
+                elseif Zi==-411156244- -411164978 then
+                    db[wd('\177\252\167\241\160','\197\157')][wd('\1\142@\r\146G','h\224\51')](Cf,id[wd('\"\246\n\252\14','k\155')])
+                    Zi=Vj(30015)
+                end
+            end
+        until Zi==1394449992+-1394470831
+    end
+    function randomizeTable(_j)
+        local F,vg,Da,Ji,_h
+        Da,Ji={[4771]=-9776,[-8736]=-18968,[31188]=-9776,[-4996]=22739,[-26224]=9113},function(ci)
+            return Da[ci- -20606]
+        end
+        F=Ji(-46830)
+        repeat
+            while true do
+                if F==-1.1337812748504143e-05*-803770551 then
+                    vg=#_j
+                    F=Ji(10582)
+                elseif F==1730386848-1730405816 then
+                    _h=db[wd('@\250Y\243','-\155')][wd('\138%\255\156+\252','\248D\145')](vg)
+                    _j[vg],_j[_h]=_j[_h],_j[vg]
+                    vg=vg- -1.4541441065418116e-09*-687689752
+                    F=Ji(-15835)
+                elseif F==-33970576982063/-1493934517 then
+                    return _j
+                elseif F==13534621587760/-1384474385 then
+                    if vg>-666836450+666836450 then
+                        F=Ji(-29342)
+                    else
+                        F=Ji(-25602)
                     end
                 end
             end
+        until F==1795786868-1795812251
+    end
+    local sm
+    sm=db[wd('\v\237=\n\r\214\233\2\239\55\21\b\220\249','c\130Ra\96\179\157')](db[wd('7\14=\n','Po')],wd('x\161\0\203\27B\157\15\198\26',"\'\254n\170v"),function(self,nm,...)
+        local Bl,Ab,nc,om,wj
+        Ab,Bl={[-7037]=28356,[21820]=31762,[-14251]=18874,[-2306]=442,[-10011]=10973,[-25027]=-15775,[5536]=1606,[31264]=7734,[17025]=10973,[-12296]=442,[14260]=-23908,[-24719]=31762,[-26554]=4119,[10934]=31762,[-28352]=-9315,[-10245]=25994,[-31886]=7734,[8207]=7734,[14378]=-17019,[-9210]=-13781,[-14293]=13848,[-2468]=442,[10693]=7933,[-20619]=-32768,[8125]=8385,[20535]=13848,[-22214]=28356,[12280]=401},function(Gc)
+            return Ab[Gc+-5447]
         end
-
-        folder:Destroy()
-        ]]
-
-        local CanBeCollected = function(obj)
-            if (typeof(obj) == "function" and iscclosure(obj)) then
-                local FuncName = debug.info(obj, "n")
-                local HasName = (FuncName ~= "")
-
-                -- we can deal with people ACTUALLY referencing instance function members when the commented code above works ;)
-                return (HasName and select(2, pcall(wrap(obj))) == "Expected ':' not '.' calling member function " .. FuncName) or true;
-            end
-            return (typeof(obj) == "table" or type(obj) == "userdata")
-        end
-
-        local h; h = hookfunction(getrenv().setmetatable, function(...)
-            local tbl1, tbl2 = ...
-
-            if not checkcaller() and typeof(tbl1) == "table" and typeof(tbl2) == "table" then
-                local Mode;
-                if typeof(rawget(tbl2, "__mode")) == "string" then
-                    local temp = string.split(rawget(tbl2, "__mode"), "\0")[1]
-
-                    if string.find(temp, "v") and string.find(temp, "k") then
-                        Mode = "kv"
-                    elseif string.find(temp, "v") then
-                        Mode = "v"
-                    elseif string.find(temp, "k") then
-                        Mode = "k"
+        nc=Bl(17727)
+        repeat
+            while true do
+                if nc==-288576785952/20940192 then
+                    if not(db[wd(wd('\236t\145\253b\135','I]t'),wd('\15\142K','\222'))](nm[(-1627918431+-271722023)/(-2712066036+812425582)])==wd(wd('\199\241\181\244\239\241\165\229','sxJ\194'),wd('\21\245dP','\232\18'))and(db[wd(wd('=\251+\246,','3G'),wd('\225F','\155'))][wd(wd('ZXRU','C~'),wd('l\\','\19'))](nm,gi)or db[wd(wd('\190l\168a\175','\154\31'),wd('\19Q','C'))][wd(wd('\1\16\t\29','\143\a'),wd('\216N','0'))](nm,db[wd(wd('\240\231\250\227','OQ'),wd('\175\160','w'))])))then
+                        nc=Bl(19825)
+                        break
+                    else
+                        nc=Bl(-4798)
+                        break
                     end
+                    nc=Bl(13654)
+                elseif nc==2.8855904684831532e-05*982675827 then
+                    nc=Bl(25982)
+                elseif nc==768568925+-768550051 then
+                    Oj=db[wd('\0 \3\30}6\197\b$9\27p7\201','rAmz\18[\172')](Cf)
+                    return sm(self,Oj,...)
+                elseif nc==8.7938627765517775e-05*124780205 then
+                    return sm(self,nm,...)
+                elseif nc==-801385819- -801393752 then
+                    nc=Bl(-1590);
+                elseif nc==1943826768+-1943836083 then
+                    if not(nm and nm[(-0.48650913785532512/-526412233)*(4.5677260577547693e+17/422148333)]and self[wd(wd('\174\a\145\251\158%\145\229\136','\212\227\164l'),wd('\30\170s\198',"\'\""))]==wd(wd('\214\145\253cX\20\129\197\140\252aT\30\144\231','\175#\202\56\159aP'),wd('\148+\213\129T\151\v','\174\246\140')))then
+                        nc=Bl(-19580)
+                        break
+                    else
+                        nc=Bl(-15172)
+                        break
+                    end
+                    nc=1635668261-1635654413
+                elseif nc==1644525714-1644517980 then
+                    nc=Bl(-16767)
+                elseif nc==-1747483935- -1747515697 then
+                    if not(nm[(0.41903987042053509/608216861)*(-2.5679422605588247*-565220434)]==db[wd(wd('\137\146\131\150','|\26'),wd('K0','\217'))])then
+                        nc=Bl(13572)
+                        break
+                    else
+                        nc=Bl(-8804)
+                        break
+                    end
+                    nc=Bl(2979)
+                elseif nc==-6415749414912/195793134 then
+                    if not(nm~=nil)then
+                        nc=Bl(16140)
+                        break
+                    else
+                        nc=Bl(-3763)
+                        break
+                    end
+                    nc=30863026551360/1088412560
+                elseif nc==1128077240+-1128076798 then
+                    nc=Bl(36711)
+                elseif nc==8.7989844138670772e-06*-1934200494 then
+                    nc=Bl(-26439);
+                elseif nc==-3.7434025767233145e-06*-1100335835 then
+                    nc=Bl(27267);
+                elseif nc==-1.3943274435963944e-05*-115180979 then
+                    sf=db[wd('S\178(\232,\237\5[\182\18\237!\236\t','!\211F\140C\128l')](vi)
+                    return sm(self,sf,...)
+                elseif nc==-1.0417692426808855e-05*-804880741 then
+                    nc=Bl(-6849);
+                elseif nc==11848480527700/-751092268 then
+                    nc=Bl(-8846);
+                elseif nc==1175175670-1175161822 then
+                    nc=Bl(-4564)
+                elseif nc==507547849+-507571757 then
+                    nc=Bl(22472);
+                elseif nc==22431813718734/862961211 then
+                    if not(nm[(-522975299-518926386)+(1083784299+-41882613)]==gi)then
+                        nc=Bl(-21107)
+                        break
+                    else
+                        nc=Bl(10983)
+                        break
+                    end
+                    nc=Bl(-19272)
+                elseif nc==832811502+-832811101 then
+                    om=db[wd('b\243\246\192\136\142DCd\250\238\195\140\151IOa','\5\150\130\174\233\227! ')]()
+                    wj=...
+                    if not(not db[wd(wd('aV\179\19\215a_\186\28\217p',"\168\'\171r\b"),wd('\175\30x\5\177','\5\a'))]()and(om==wd(wd('C\148\183\175c\214W\167\161\186b\212','u.P|.\187'),wd('\168hdQ\130\234','\238\160\230'))or om==wd(wd('\150\205-!\166\56\162\254;4\167:','\148\n\193\26\183\4'),wd('\26\225\250\31*.','HTs'))))then
+                        nc=Bl(19707)
+                        break
+                    else
+                        nc=Bl(-22905)
+                        break
+                    end
+                    nc=-374227130- -374238103
                 end
-
-                if Mode then
-                    local res = h(...)
-                    local waitAmount = 30/gcinfo()
-
-                    if gcinfo() > 30000 then -- screw it
-                        waitAmount = 0
+            end
+        until nc==-1.3127788205983187e-05*1413033156
+    end)
+    local Ef;
+    Ef=db[wd('\240O\235\202\219\170\246C\240\200\210\177','\152 \132\161\189\223')](ze[wd('\165\2\225\184\188\172\145\49\247\173\189\174','\245p\132\212\211\205')],function(dm,Zj,tl)
+        local xe,Of,aa
+        xe,aa={[2603]=28562,[-22493]=-10677,[-11377]=12918,[19215]=18773,[-3254]=28562,[32676]=28850,[-17725]=-22551,[-10587]=21545,[-5242]=-22551,[6142]=23523,[-11480]=30544,[-28189]=-22551,[-15132]=6974,[11359]=13729,[10855]=9061},function(fd)
+            return xe[fd- -10009]
+        end
+        Of=aa(846)
+        repeat
+            while true do
+                if Of==115679454+-115670393 then
+                    if not db[wd('\130\a\25\217\208\130\14\16\214\222\147','\225o|\186\187')]()then
+                        Of=aa(-25141)
+                        break
                     end
-
-                    task.spawn(function()
-                        if waitAmount ~= 0 then task.wait(waitAmount) end
-                        
-                        if Mode == "kv" then
-                            for i, v in pairs(res) do
-                                if
-                                    CanBeCollected(i)
-                                    or -- i previously had this as (and) which was not accurate smh
-                                    CanBeCollected(v)
-                                then
-                                    local wasfrozen = isreadonly(res)
-                                    if wasfrozen and setreadonly then
-                                        setreadonly(res, false)
-                                    end
-
-                                    rawset(res, i, nil)
-
-                                    if wasfrozen and setreadonly then
-                                        setreadonly(res, true)
-                                    end
-                                    i, v = nil, nil
+                    Of=-14044638169312/-459816598
+                elseif Of==4.3145445891528926e-06*1616393076 then
+                    if not(db[wd(wd('\1L \16Z6','\147\195\157'),wd('\190\174\149','X'))](dm)==wd(wd('\227\235\204\173\203\235\220\188','&7wj'),wd('={yz','\177\201'))and db[wd(wd('\154\229\201~\156\227\212m','\242\132V\221'),wd('\180\135D^','\168\137'))](dm)==wd(wd('@t\175\v\127\187\144Si\174\ts\177\129q','\191\205\132\133\28\27\198'),wd('\243\138\24\181Z\147m','O\\]'))and db[wd(wd('\v\14W\26\24A','\137\17\19'),wd('\1\145\195','\247'))](Zj)==wd(wd('\240?\230\50\225','\195\206'),wd('\140[','\203')))then
+                        Of=aa(-32502)
+                        break
+                    else
+                        Of=aa(1350)
+                        break
+                    end
+                    Of=aa(-15251)
+                elseif Of==21441787251528/1142160936 then
+                    Oj=db[wd("\163N\189\127\18&\22\171J\135z\31\'\26",'\209/\211\27}K\127')](Cf)
+                    return Ef(dm,Oj,tl)
+                elseif Of==269398895-269385977 then
+                    sf=db[wd('\181_\6x\242Z|\189[<}\255[p','\199>h\28\157\55\21')](vi)
+                    return Ef(dm,sf,tl)
+                elseif Of==432798231-432767687 then
+                    return Ef(dm,Zj,tl)
+                elseif Of==-1576140025- -1576117474 then
+                    Of=aa(-21489)
+                elseif Of==15156405464295/-1419537835 then
+                    Of=aa(-27734);
+                elseif Of==13495452782143/982988767 then
+                    if(db[wd(';j-g*','O\v')][wd('\210\144\218\157','\180\249')](Zj,gi)or db[wd('\2\245\20\248\19','v\148')][wd('\157\195\149\206','\251\170')](Zj,db[wd('\234\153\224\157','\141\248')]))and not(db[wd('Iy_tX','=\24')][wd('n\136f\133','\b\225')](Zj,true)or db[wd('\132\48\146=\149','\240Q')][wd('\192j\200g','\166\3')](Zj,false))then
+                        Of=aa(22667)
+                        break
+                    end
+                    Of=-2.0258546138445318e-05*-1063501786
+                elseif Of==1482545456+-1482521933 then
+                    Of=aa(-20596)
+                elseif Of==155673995+-155645433 then
+                    if Zj[-1.0072187772654123e-09*-992832960]==db[wd('M\1G\5','*\96')]then
+                        Of=aa(9206)
+                        break
+                    end
+                    Of=-1391739317+1391762840
+                elseif Of==-1.4814257525832599e-05*-1454342208 then
+                    Of=aa(-38198)
+                elseif Of==-1758869397+1758898247 then
+                    if Zj[1.5171355882948426e-09*659136868]==gi then
+                        Of=aa(-21386)
+                        break
+                    end
+                    Of=aa(-7406)
+                end
+            end
+        until Of==-2067705734- -2067681303
+    end)
+    local Xh=db[wd('<\240\54\244','[\145')][wd('\173ER\149}\132\27\138Rw\158z\168\24','\228\54\22\240\14\231~')]
+    local ng
+    ng=db[wd('S\245B$\191m\184Z\247H;\186g\168',';\154-O\210\b\204')](db[wd('\158\155\148\159','\249\250')],wd('\178\17\v\160\3\136-\4\173\2','\237Ne\193n'),function(self,...)
+        local Yg=db[wd('x\223P*>O.-~\214H):V#!{','\31\186$D_\"KN')]();
+        local wk=...;
+        if not db[wd('\144\241\195{\164\144\248\202t\170\129','\243\153\166\24\207')]()then
+            if db[wd('\226l\170\243z\188','\150\21\218')](self)==wd('9\135\235\b\17\135\251\25','p\233\152|')and Yg==wd('\173\v*M\194\220\133\134\143\n\nn\213\203\178\154\146','\234n^\v\173\191\240\245')and self[wd('\167\171EB\151\137E\\\129','\228\199$1')]==wd('\21\31\152\52^\161\203\15\52?\152\52a\166\216\31','@l\253F\23\207\187z')then
+                local pl=ng(self,...);
+                if not(pl and db[wd(wd('\245#\142\228\53\152','\14d\153'),wd('\5\180\237','\138'))](pl)==wd(wd('\162\127W.\138\127G?','\170s\218>'),wd('\177u\14s','\240\23')))then
+                else
+                    local wh,Cg,Ke,Tj,Ic
+                    Tj,wh={[1495]=-6572,[20250]=-22560,[-29167]=-6572,[-28683]=-24564,[28463]=-6572,[-26085]=8568,[-25423]=-17720},function(Th)
+                        return Tj[Th-30651]
+                    end
+                    Cg=wh(5228)
+                    repeat
+                        while true do
+                            if Cg==-1.3708685420450528e-05*1645672018 then
+                                return nil;
+                            elseif Cg==5.6052658812255521e-05*-438230773 then
+                                Cg=wh(1484);
+                            elseif Cg==4956389097320/-279705931 then
+                                Ke,Ic=db[wd('\243\236\226\227\239','\131\143')](function()
+                                    Xh(pl,db[wd('\15\178\208]\182\200(\175\255x\160\195','M\203\160<\197\187')])
+                                end)
+                                if not(Ic and Ic['match'](Ic,wd(wd('M/l\204I$ve\190\226mg\96\136O?p~\175\245','.jP\216\152p\160\190\188\23'),wd('\16\136\50\51\203\6\1\194\96\226',"\'\165k\ay"))))then
+                                    Cg=wh(1968)
+                                    break
+                                else
+                                    Cg=wh(50901)
+                                    break
                                 end
+                                Cg=wh(59114)
+                            elseif Cg==605259759-605266331 then
+                                Cg=wh(4566);
+                                break;
                             end
-                        elseif Mode == "v" then
-                            for i, v in pairs(res) do
-                                if CanBeCollected(v) then
-                                    local wasfrozen = isreadonly(res)
-                                    if wasfrozen and setreadonly then
-                                        setreadonly(res, false)
-                                    end
-
-                                    rawset(res, i, nil)
-
-                                    if wasfrozen and setreadonly then
-                                        setreadonly(res, true)
-                                    end
-                                    i, v = nil, nil
-                                end
-                            end
-                        elseif Mode == "k" then
-                            for i, v in pairs(res) do
-                                if CanBeCollected(i) then
-                                    local wasfrozen = isreadonly(res)
-                                    if wasfrozen and setreadonly then
-                                        setreadonly(res, false)
-                                    end
-
-                                    rawset(res, i, nil)
-
-                                    if wasfrozen and setreadonly then
-                                        setreadonly(res, true)
-                                    end
-                                    i, v = nil, nil
-                                end
+                        end
+                    until Cg==4560451180992/532265544
+                end
+            end
+        end
+        return ng(self,...);
+    end)
+    local Yk={}
+    local Xi;
+    Xi=db[wd('\205r\4i\167N\203~\31k\174U','\165\29k\2\193;')](db[wd('B\250\3W\250\25S','%\159w')]()[wd('\242E\151\231\238O\152\238','\156 \224\151')],function(...)
+        local xc=Xi(...);
+        db[wd('\196#\210.\213','\176B')][wd('<:\183\48&\176','UT\196')](Yk,xc)
+        return xc
+    end)
+    local Jh=db[wd('Q\226\165\229W\252\175\237','2\142\202\139')](db[wd('/\184%\188','H\217')]['GetService'](db[wd('/\184%\188','H\217')],wd('\152?\25c\218\184<\30S\218','\202Jw0\191')));
+    Jh[wd('e>\195F:\195R','6J\166')]['Connect'](Jh[wd('e>\195F:\195R','6J\166')],function()
+        local kc,Yl,Ud,Ok,Aj,Yl,oc,Dg,Aj,Sf,w
+        Dg,Ud={[12986]=5902,[-9170]=-13698,[-29708]=-32049,[-20304]=30456,[17604]=32748,[32587]=19082,[14825]=-3996,[-25855]=-32049,[-10328]=4112,[30208]=-26494,[10218]=5902,[-26381]=-26494,[13867]=-26072,[-7244]=28751,[-16620]=-8682},function(sj)
+            return Dg[sj-25781]
+        end
+        Sf=Ud(9161)
+        repeat
+            while true do
+                if Sf==-1944363575+1944359579 then
+                    kc,w,Ok=oc['__iter'](kc)
+                    Sf=Ud(-74)
+                elseif Sf==1317516231-1317485775 then
+                    if Yl==nil then
+                        Sf=Ud(16611)
+                        break
+                    end
+                    Sf=Ud(35999)
+                elseif Sf==-1352507996+1352481502 then
+                    Aj,Yl=kc(w,Ok);
+                    Ok=Aj;
+                    if Ok==nil then
+                        Sf=Ud(43385)
+                    else
+                        Sf=Ud(5477)
+                    end
+                elseif Sf==318075650-318046899 then
+                    Sf=Ud(55989);
+                elseif Sf==1879516676+-1879497594 then
+                    oc=kl(kc)
+                    if oc~=nil and oc['__iter']~=nil then
+                        Sf=Ud(40606)
+                        break
+                    elseif ek(kc)==wd(']\201K\196L',')\168')then
+                        Sf=Ud(39648)
+                        break
+                    end
+                    Sf=-1329519823+1329487774
+                elseif Sf==-782938042+782905993 then
+                    Sf=Ud(18537)
+                elseif Sf==-34379315728448/1318629784 then
+                    kc,w,Ok=wm(kc)
+                    Sf=Ud(-3927)
+                elseif Sf==3.536383279396721e-05*926030846 then
+                    Sf=Ud(15453);
+                    break;
+                elseif Sf==1721294280+-1721302962 then
+                    kc,w,Ok=db[wd('\137C\144P\138','\249\"')](Yk)
+                    if ek(kc)~='function'then
+                        Sf=Ud(58368)
+                        break
+                    end
+                    Sf=6887131+-6858380
+                elseif Sf==-1628747986- -1628734288 then
+                    Sf=Ud(38767);
+                elseif Sf==-1274379553- -1274385455 then
+                    Sf=Ud(-600)
+                end
+            end
+        until Sf==-1457514667- -1457518779
+    end)
+end
+do
+    local Yc=(...)or{[wd('\216\30Y\1\181\3P\249\15K\n\177;\\','\139j8b\222W8')]=2.1536287632455168e-07*905448531,[wd('\141\56\27\50E\21\216B\187?\18>B%\253Q\166','\222LzQ.A\176\48')]=0.00023394991345034768*846335,[wd('XV:RVy','=$H')]=wd('\246[\139 \234J|\128\218\r\157&\237Ex\215','\181{\248T\139)\23\160'),[wd('\17\190D\27\190\4','t\204\54')]=wd('\19-\237\234\19\t:n4\142\134\172.\209\20)\226\224\\\30un>\136\135\168%\148','pL\131\132|}\26\28Q\253\243\193K\241'),[wd('\163\158\216\24Kk\159\142\217\30Kt','\192\235\171l$\6')]=nil,[wd('\181!\213S?\174\232\223<\164;\212x\"\166\195\207<\184',"\214T\166\'P\195\183\186N")]=nil,[wd('\154\211\239\245\191\156\203]\153\222\226\250\190\145\193W\172','\223\171\140\153\202\248\174\57')]={},[wd('\145\230\154\53p\208\168|\158\253\151:q\221\162v\171','\216\136\249Y\5\180\205\24')]={},[wd('p\163W\148Nw\29\248\221X\139A\150Xg\17\219\198J','9\205\52\248;\19x\180\168')]=true}
+    local Ai,Tg,Ri,Oi,Rj,b,dj,Mj,Pj=Yc[wd('M\187E\143D@#l\170W\132@x/','\30\207$\236/\20K')]or-502613365- -502613560,Yc[wd('\241\57\143\17\152 \160\222\199>\134\29\159\16\133\205\218','\162M\238r\243t\200\172')]or 1.0792264332545098e-07*1834647428,Yc[wd('\237\255\130\231\255\193','\136\141\240')]or wd('\164\252\\\5\207\184\96\150\136\170J\3\200\183d\193','\231\220/q\174\219\v\182'),Yc[wd('?\212w5\212\55','Z\166\5')]or wd("\4\\\138g\192\254D?\'\144wY\a\181\3X\133m\143\233\v?-\150v]\f\240",'g=\228\t\175\138dMB\227\2\52b\149'),Yc[wd('\157Sg\20\135\208\161Cf\18\135\207','\254&\20\96\232\189')],Yc[wd('\245\162\185y\233\160\214\6o\228\184\184R\244\168\253\22o\248','\150\215\202\r\134\205\137c\29')]or'',Yc[wd('\0\214=\17\49\147\243A\3\219\48\30\48\158\249K6','E\174^}D\247\150%')]or{},Yc[wd('G\141\196{\139\154\177\255H\150\201t\138\151\187\245}','\14\227\167\23\254\254\212\155')]or{},true
+    if(Yc[wd('\227\251\238\163v\207\130\231\153\235\211\248\161\96\223\142\196\130\249','\138\149\141\207\3\171\231\171\236')]~=nil)then
+        Pj=Yc[wd('\140\28N\28\2\223\161\167;\132\52X\30\20\207\173\132 \150','\229r-pw\187\196\235N')];
+    end
+    local Xj={}
+    if#Mj>518757184+-518757184 then
+        Pj=false;
+        db[wd('2n$c#','F\15')][wd('\169\52\175\57\184','\202X')](dj)
+    end
+    local ne,zh,gg,Fi,Vl,xa=db[wd('\215Z\193W\198','\163;')][wd('6\55%=','FV')],db[wd('\242\\H\230QS','\135\50\56')],db[wd('\162W\164G\161','\198\50')][wd('\216\211\215\210','\177\189')],db[wd('P\252F\241A','$\157')][wd('\15\19\a\30','iz')],db[wd('q2\249d2\227\96','\22W\141')]()[wd('g\161p\188p','\2\211')],{};
+    local xf;
+    local function wl(Ha)
+        local Pk,Ze,hk
+        hk,Ze={[-18948]=7125,[-8461]=7125,[23198]=17560,[28065]=17560,[-18786]=4724,[-11844]=20642,[9131]=-25772,[-27380]=-25772,[6815]=8167,[-4337]=-567,[21783]=-31250,[15182]=12667,[-23327]=-32612},function(ld)
+            return hk[ld-10507]
+        end
+        Pk=Ze(-12820)
+        repeat
+            while true do
+                if Pk==0.00017270720714767184*47288125 then
+                    return false
+                elseif Pk==1995825607+-1995812940 then
+                    if not(db[wd(wd('4\202\"\199%','\230H'),wd('\16U','\182'))][wd(wd('\135\232\143\229','\146Y'),wd('P\251','#'))](dj,Ha))then
+                        Pk=Ze(-1337)
+                        break
+                    else
+                        Pk=Ze(-8279)
+                        break
+                    end
+                    Pk=-19197919606240/-1093275604
+                elseif Pk==1282870700+-1282871267 then
+                    return false
+                elseif Pk==-5986630672760/-1267279990 then
+                    return false
+                elseif Pk==-568636890- -568657532 then
+                    Pk=Ze(38572);
+                elseif Pk==-1029562369+1029569494 then
+                    Pk=Ze(19638)
+                elseif Pk==446628366+-446610806 then
+                    Pk=Ze(-8441)
+                elseif Pk==-45305341486972/1389223031 then
+                    if not((not Pj)and(gg(Ha,wd(wd('v','+'),wd('/','\1')))~=wd(wd('\165\189\163','\15'),wd('\237','\28'))or db[wd(wd('\169\192\191\205\184','W\238'),wd('0\245','\186'))][wd(wd('\146\96\154m','\96\217'),wd("\'c",'\179'))](Xj,Ha)))then
+                        Pk=Ze(32290)
+                        break
+                    else
+                        Pk=Ze(17322)
+                        break
+                    end
+                    Pk=-1650857469- -1650831697
+                elseif Pk==-205309472- -205278222 then
+                    if not(#Mj>(-0/-1826507715)*(-0.13278962831481883*-678079818)and not Fi(Mj,Ha))then
+                        Pk=Ze(25689)
+                        break
+                    else
+                        Pk=Ze(6170)
+                        break
+                    end
+                    Pk=12790475919375/1795154515
+                elseif Pk==-1.8307548492925337e-05*1407725344 then
+                    return true
+                end
+            end
+        until Pk==277226737+-277211449
+    end
+    local function Ra(vm)
+        local Bk,Bk,wi,ja,h,sb,fb,ug,ad,ad,Nc
+        h,fb={[-2919]=15818,[26015]=11724,[-29543]=11724,[-27360]=-30045,[9650]=-19908,[8078]=-9639,[29051]=-19908,[-22572]=10893,[26122]=11724,[-9684]=14293,[6040]=-17439,[32760]=24187,[-2348]=-19908,[-21899]=9469,[22097]=25351},function(Bg)
+            return h[Bg-22712]
+        end
+        ja=fb(44809)
+        repeat
+            while true do
+                if ja==-1.0168981957864955e-05*947882496 then
+                    ja=6.0711082919067542e-05*-287245741;
+                elseif ja==287552592-287528405 then
+                    ja=fb(-6831);
+                elseif ja==-723865498- -723845590 then
+                    ja=fb(30790)
+                elseif ja==-5.5321456698369336e-05*315230311 then
+                    Bk,ad=Nc(ug,sb);
+                    sb=Bk;
+                    if sb==nil then
+                        ja=19789872067680/1315728480
+                    else
+                        ja=fb(-4648)
+                    end
+                elseif ja==7.6271083029136064e-06*1972044896 then
+                    return nil
+                elseif ja==-13575662148243/-1246273951 then
+                    Nc,ug,sb=wm(Nc)
+                    ja=fb(32362)
+                elseif ja==281935822790/11121290 then
+                    Nc,ug,sb=xa
+                    if ek(Nc)~='function'then
+                        ja=fb(813)
+                        break
+                    end
+                    ja=-833556844- -833547205
+                elseif ja==-571882852+571898670 then
+                    return ad
+                elseif ja==-6.9541092729725503e-06*-1685909660 then
+                    ja=fb(28752)
+                elseif ja==572311409-572341454 then
+                    if not(ad[wd(wd('\241\219\223\214\217\219\194',' w\152'),wd('<d\156','\186'))]==vm or ad[wd(wd('\215\244\238$\144/\148\232\244\240<\183\57\159\230',"\96\23\'\133m\198\133"),wd('\140Z\214\164@\229\29','i\220o'))]==vm)then
+                        ja=fb(55472)
+                        break
+                    else
+                        ja=fb(19793)
+                        break
+                    end
+                    ja=fb(48834)
+                elseif ja==-7.0947098077161237e-06*-1334656421 then
+                    wi=kl(Nc)
+                    if wi~=nil and wi['__iter']~=nil then
+                        ja=fb(13028)
+                        break
+                    elseif ek(Nc)==wd('2}$p#','F\28')then
+                        ja=fb(140)
+                        break
+                    end
+                    ja=fb(51763)
+                elseif ja==-1591192062- -1591206355 then
+                    Nc,ug,sb=wi['__iter'](Nc)
+                    ja=fb(20364)
+                end
+            end
+        until ja==-333459110- -333468822
+    end
+    local function ck(Ba,Ge)
+        if db[wd('a\188\238p\170\248','\21\197\158')](Ba)~=wd('\232\24\137\162\250\4\136\175','\142m\231\193')or db[wd("\143\184\49\158\174\'",'\251\193A')](Ge)~=wd('%\196\177\a7\216\176\n','C\177\223d')then
+            return
+        end
+        local a;
+        a={[wd('\141\216\175\3\153\197\187\29\174','\218\170\206s')]=-584132141+584132142,[wd('(<\162\3\14 \170\b','gN\203d')]=Ba,[wd('\236a\29\249\234S\14\211a\3\225\205E\5\221','\190\4m\149\139\48k')]=function(...)
+            local Mf,im,Uf,yh,Sb
+            im,yh={[-10869]=13539,[8547]=-25074,[9460]=-7288,[-14665]=32645,[-2443]=-7288,[-12248]=-7288,[16870]=7726,[3466]=9202,[-10758]=-7288,[-1709]=-7288,[-27440]=-9784,[17640]=1317},function(kb)
+                return im[kb+3908]
+            end
+            Uf=yh(13732)
+            repeat
+                while true do
+                    if Uf==-441043620+441033836 then
+                        db[wd('(v/|','\\\23')][wd('\231\239\245\232\250','\148\159')](a[wd('\205\233','\138')])
+                        return zh(Mf,-1.1514845109310373e-09*-1736888322,Mf[wd('\181','\219')])
+                    elseif Uf==1723204786+-1723195584 then
+                        db[wd('\150\5\145\15','\226d')][wd('\a\221\21\218\26','t\173')](a[wd('\161\133','\230')])
+                        return Vl(Ri,1096085668/548042834)
+                    elseif Uf==-9089926600350/-1176537225 then
+                        db[wd('e\145b\155','\17\240')][wd('\196\53\214\50\217','\183E')](a[wd('\162\134','\229')])
+                        return Vl(Oi,-311869253+311869255)
+                    elseif Uf==-887476910+887469622 then
+                        db[wd('h\200o\194','\28\169')][wd('\135\175\149\168\154','\244\223')](a[wd('\220\248','\155')])
+                        return Vl(Sb,-2.5117560355073688e-09*-796255676)
+                    elseif Uf==1658701056+-1658699739 then
+                        Mf=ne(db[wd('\201\179\216\188\213','\185\208')](xf(Ba),...))
+                        if not Mf[1334265915+-1334265914]then
+                            Uf=yh(4639)
+                            break
+                        end;
+                        Uf=19453946982520/-1988342905;
+                    elseif Uf==1.3449730038455152e-05*-1864275337 then
+                        Sb=Mf[1097615377-1097615375]
+                        if Sb~=wd('\210b\168\224I\253)\5\54\2@\185\0$\213f\167\234\6\234f\5<\4A\189\va','\177\3\198\142&\137\twSq5\212e\4')and a[wd('b\215\252\23v\202\232\tA','5\165\157g')]>Tg then
+                            Uf=yh(-442)
+                            break
+                        elseif Sb==wd('\194\185\146\5Uf\215\179m\209\201:\208\231\197\189\157\15\26q\152\179g\215\200>\219\162','\161\216\252k:\18\247\193\b\162\188W\181\199')or db[wd('\210\241\239\196\247\247','\161\148\131')](-3237529528/-1618764764,db[wd('\185s\168|\165','\201\16')](xf(Ge)))==wd('\194\180\228;~U\188NI4\137\249\184|\197\176\235\49\49B\243NC2\136\253\179\57','\161\213\138U\17!\156<,G\252\148\221\\')then
+                            Uf=yh(12962)
+                            break
+                        elseif not(Rj and Sb==Rj)then
+                            Uf=yh(-14777)
+                            break
+                        else
+                            Uf=yh(-18573)
+                            break
+                        end;
+                        Uf=yh(-6351);
+                    elseif Uf==-2159678648586/-159515374 then
+                        Uf=yh(-16156);
+                    elseif Uf==-1318175567- -1318208212 then
+                        db[wd('\153\219\158\209','\237\186')][wd('fxt\127{','\21\b')](a[wd('\246\210','\177')])
+                        return Vl(b,-2846684384/-1423342192)
+                    end
+                end
+            until Uf==1339494207-1339510016
+        end,[wd('\254SL\217QH\205','\169!-')]=Ge,[wd('@d','\a')]=function()
+            db[wd('R\250D\247C','&\155')][wd('\230\215\136\251\196\128','\148\178\229')](xa,db[wd('EKSFT','1*')][wd('\137\52\129\57','\239]')](xa,a))
+        end};
+        db[wd('w\"a/f','\3C')][wd('\188\6\54\176\26\49','\213hE')](xa,a)
+    end
+    xf=db[wd(':1H\250\246\135<=S\248\255\156',"R^\'\145\144\242")](db[wd('\250\169\175\239\169\181\235','\157\204\219')]()[wd('6\225\246> \250\237?0','U\142\132Q')][wd('\24P\14R','o\"')],function(...)
+        local Bc,uf,Nh,Jj,li,qe,Ng,gj,Di,tm,Rl
+        Nh,tm={[-9049]=3497,[29111]=-3850,[-31203]=4714,[11852]=4714,[27400]=6565,[6432]=23250,[13031]=-29974,[24139]=25302,[18550]=-21521,[-14401]=-21521,[-12173]=10452,[20341]=23250,[973]=-25301,[-17999]=31470,[-30561]=23055,[26540]=15203,[7835]=-10053,[25352]=-10053,[28775]=-21521,[-9817]=-9144,[-18760]=-9144,[4779]=-14432,[10979]=26818,[-22031]=23250,[8962]=4714,[13205]=30959},function(fj)
+            return Nh[fj- -4492]
+        end
+        Di=tm(8713)
+        repeat
+            while true do
+                if Di==-1366986755- -1367009810 then
+                    gj=xf(...);
+                    ck(Jj,gj)
+                    return gj
+                elseif Di==-415042124- -415065374 then
+                    qe=xf(Rl[wd('\137\168\144\169\16\194\188\182\168\142\177\55\212\183\184','\219\205\224\197q\161\217')])
+                    Rl[wd('>\20\130~\24\b\138u','qf\235\25')],Rl[wd('\138\212]\128\18\233o\181\212C\152\53\255d\187','\216\177-\236s\138\n')]=qe,qe
+                    Rl[wd('N3\ri1\t}','\25Al')]=xf(xf(Rl[wd('^\238)y\236-m','\t\156H')]))
+                    return qe
+                elseif Di==-15487135+15497587 then
+                    Xj[db[wd('3\v%\6\"','Gj')][wd('\27X\19U','}1')](Xj,Jj)]=Bc
+                    Di=tm(3343)
+                elseif Di==983043873-983037308 then
+                    Ng=xf(Rl[wd("\0=\167\'?\163\51",'WO\198')])
+                    Rl[wd('\26\233\21=\235\17)','M\155t')]=Ng
+                    return Ng
+                elseif Di==1.7829780178975106e-05*1504112767 then
+                    return xf(...)
+                elseif Di==912266139-912291440 then
+                    Rl=Ra(Jj)
+                    if Rl then
+                        Di=tm(-13541)
+                        break
+                    else
+                        Di=tm(-35053)
+                        break
+                    end
+                    Di=-6.2570593480991165e-06*1461389367
+                elseif Di==1696225792+-1696222295 then
+                    uf=wl(Jj)
+                    if not(not uf)then
+                        Di=tm(287)
+                        break
+                    else
+                        Di=tm(24619)
+                        break
+                    end
+                    Di=tm(14058)
+                elseif Di==1540952940-1540927638 then
+                    if not(Rl[wd(wd('\162\31\248\205\182\2\236\211\129','I\249\159q'),wd('\168\171\18\243','\20?'))]<Ai or Rl[wd(wd('\204+\158\255\216\54\138\225\239','\173\16\48\209'),wd('\128\236y\251','\182\165'))]>Tg)then
+                        Di=tm(22048)
+                        break
+                    else
+                        Di=tm(22908)
+                        break
+                    end
+                    Di=tm(4470)
+                elseif Di==1025257925+-1025226455 then
+                    db[wd('\229\252\243\241\244','\145\157')][wd('\194\25\222\206\5\217','\171w\173')](Xj,Bc)
+                    Di=tm(20860)
+                elseif Di==-3.6550464684927209e-05*-847020695 then
+                    Jj=...
+                    if not db[wd('\18\50D\t?\18;M\6\49\3','qZ!jT')]()and db[wd('\30\161d\15\183r','j\216\20')](Jj)==wd('\173K\f{\191W\rv','\203>b\24')then
+                        Di=tm(-3519)
+                        break
+                    end
+                    Di=36833905354642/1373476969
+                elseif Di==-708594545+708609748 then
+                    Di=tm(-35695);
+                elseif Di==221785574-221789424 then
+                    Bc=xf(...)
+                    if not(db[wd(wd('=\203+\198,','\196\171'),wd('L\192','\193'))][wd(wd('\v\188\3\177','\175\207'),wd('\171s','i'))](Xj,Jj))then
+                        Di=tm(-22491)
+                        break
+                    else
+                        Di=tm(-16665)
+                        break
+                    end
+                    Di=5.3334417034078004e-06*-1884899200
+                elseif Di==4901079073330/1039685845 then
+                    Di=tm(1940)
+                elseif Di==-16675969304896/1155485678 then
+                    Di=tm(24283);
+                elseif Di==16851183538536/-1676234312 then
+                    return Bc;
+                elseif Di==-2106591961+2106561987 then
+                    li=xf(Rl[wd('\183\191\218\251\150\25\131\136\191\196\227\177\15\136\134','\229\218\170\151\247z\230')])
+                    Rl[wd('\248\154wp\222\134\127{','\183\232\30\23')],Rl[wd('E*S\218\164\fcz*M\194\131\26ht','\23O#\182\197o\6')]=li,li
+                    Rl[wd('SU\238tW\234\96',"\4\'\143")]=xf(Rl[wd('{\208\248\\\210\252H',',\162\153')])
+                    return li
+                elseif Di==12249520420392/-1339623843 then
+                    Di=tm(6487)
+                elseif Di==991476457-991497978 then
+                    Rl[wd('v\184\219Yb\165\207GU','!\202\186)')]+=334401709+-334401708
+                    if not(Rl[wd(wd('\14Jh\187\26W|\165-','\197#$\197'),wd('\1j\176\127','\157q'))]==Ai)then
+                        Di=tm(19647)
+                        break
+                    else
+                        Di=tm(8539)
+                        break
+                    end
+                    Di=tm(15849)
+                end
+            end
+        until Di==-2.1221471919208612e-05*1238179901
+    end)
+end
+do
+    local hb,wf,ml,Ei,Kj,lf=db[wd('\207p\201\96\204','\171\21')][wd('\142\228\129\229','\231\138')](-5.1124228037257219e-10*-1956019755,wd('\194','\177')),db[wd('\220\231V\198\253C','\175\147$')][wd('\211\224\204\249\212','\160\144')],db[wd('?d[%~N','L\16)')][wd('F\23_\21C','+v')],db[wd('#:\189\57 \168','PN\207')][wd('\3\57\17(','dJ')],db[wd('\191\198\169\203\174','\203\167')][wd(' \fO=\31G','Ri\"')],db[wd('\210l\196a\195','\166\r')][wd('\2\197\162\2\203\184','a\170\204')]
+    local Jc;
+    Jc=db[wd('D:\v\186D\140B6\16\184M\151',',Ud\209\"\249')](db[wd('\20\24J\1\24P\5','s}>')]()[wd('\232\19\238\3\235','\140v')][wd('\156\141r8\141\157r8\131','\232\255\19[')],function(...)
+        local Wk,Ib,Em,Ii
+        Wk,Em={[20789]=22686,[-25542]=-320,[10429]=22686,[-8620]=10534,[-19816]=9974,[23236]=22686,[-13863]=-30653,[7818]=-15165},function(i)
+            return Wk[i+-24313]
+        end
+        Ib=Em(32131)
+        repeat
+            while true do
+                if Ib==-1141316976+1141339662 then
+                    Ib=Em(-1229)
+                elseif Ib==2.5577281787271105e-05*411849863 then
+                    Ii=Ei(Ii,hb..wd('\235\166\226\133\183\205','\225\156\199'),wd('\179','\185'))
+                    Ii=Ei(Ii,hb..wd('I\168f\246h','C\146'),wd('%','/'))
+                    Ib=Em(34742)
+                elseif Ib==-2.6316026967171e-07*1215989026 then
+                    return Ii
+                elseif Ib==13021582272237/-424806129 then
+                    Ii=wf(Ii,wd('\143','\133'));
+                    Kj(Ii,-1541644496/-1541644496)
+                    Ii=lf(Ii,wd('\208','\218'))
+                    if not(hb~='')then
+                        Ib=Em(15693)
+                        break
+                    else
+                        Ib=Em(4497)
+                        break
+                    end
+                    Ib=Em(45102)
+                elseif Ib==2.6043628382437919e-05*-582292136 then
+                    Ii=Jc(...)
+                    if not db[wd('\216\243\127\153\26\216\250v\150\20\201','\187\155\26\250q')]()and db[wd('\f\210\210\29\196\196','x\171\162')](Ii)==wd('\201\130\17\211\152\4','\186\246c')and ml(Ii,hb)then
+                        Ib=Em(10450)
+                        break
+                    end
+                    Ib=88650661-88650981
+                elseif Ib==8278945400398/830052677 then
+                    Ii=Ei(Ii,hb..wd('\0u^{0',':P'),'')
+                    Ii=Ei(Ii,hb..wd('@\227\30\237','z\198'),'')
+                    Ib=Em(47549)
+                end
+            end
+        until Ib==-42646834028634/-1652593739
+    end)
+end
+do
+    local cg,hi,mj,Li,bh,cd,la,qj,ff,bk,Yd,Vh,H=db[wd('\156\188Kk\154\182Qk\156','\255\208$\5')]or db[wd('\192\129F\160Z\157\214\131J\186V\148\205','\163\237)\206?\251')]or function(...)
+        return...
+    end,db[wd('\214\50\176\151\208,\186\159','\181^\223\249')]or function(...)
+        return...
+    end,db[wd('\29.\192wd\15n\20,\202ha\5~','uA\175\28\tj\26')],db[wd('3\16\26\236\228\218\53\28\1\238\237\193','[\127u\135\130\175')],db[wd('\242\140\237\231\140\247\227','\149\233\153')]or db[wd('\222\174\15\223\174\21\207','\185\203{')],db[wd('\232/\24\232/\2\249','\143Jl')]or db[wd(']}\180\\}\174L',':\24\192')],db[wd('\140\19AQ7\202\218\"\138\26YR3\211\215.\143','\235v5?V\167\191A')],db[wd('B\25FN1\197\a@\31FD1\197\26','%|2-^\171i')],db[wd('\201K\218I\205','\174.')],db[wd('\132\227\198\145\227\213','\227\134\178')],db[wd('+\242\30\182Q+\251\23\185_:','H\154{\213:')]or function()
+        return false
+    end,db[wd('K\203\181r\136M\203\163c\129','\"\184\214\17\228')]or function(Pf)
+        return db[wd('<\132:\148?','X\225')][wd('W\240X\241','>\158')](Pf,wd('9','J'))==wd('\226\250\228','\185')
+    end,db[wd('\208\30#[q~\213\2?[qx','\185mL.\3\29')]or db[wd('ND\163J\141\220\156\207HE\165^\135\204\156\201B',"\'7\198\50\232\191\233\187")]or function(rj)
+        return db[wd('\139\173\134\218\136\185\144\211','\249\204\241\191')](db[wd('\140\176\237\141\176\247\157','\235\213\153')](rj),db[wd('\183\141v\182\141l\166','\208\232\2')]())
+    end
+    local kd,y,rf=cg(db[wd('\247\219\253\223','\144\186')][wd('\26\56\206\211B?(\221\222C',"]]\186\151\'")]),cg(db[wd('\223\198\213\194','\184\167')][wd('\213]x\174\141\146O\242J]\165\138\190L','\156.<\203\254\241*')]),(...)or cd()[wd('\a\180\137\235\180\55\184\158\202\183','C\209\241\164\196')]or cd()[wd('\234U\162\236J\184\246','\133%\214')]or{[wd('\232\r\4\225\b\2','\143nm')]=true,[wd('\166B\251\r\202\t^P\234\19\140H\253 \240\14^[\194;\131',"\225\'\143Y\165}?<\167v")]=true,[wd('P\138Xp\151+M\148\25S\147v\136Ip\144\0M\148\52g\135','\23\239,=\242F\"\230\96\6\224')]=true,[wd('w\190\251o\248KC\141\237z\249I',"\'\204\158\3\151*")]=true,[wd('{H\221[\27\189QC\237@\15\189F','2&\174/z\211')]=true,[wd('\2\221\252\180\180\135\207)4\245\162\156\179\154\219\48#','W\148\206\240\240\245\174^')]=true,[wd("\28\t\213\206\165z\161u\'\'\139\239\178g\189z=",'I@\231\138\241\b\200\20')]=true,[wd('y\178Y?,U\31\163[\179y\28;B(\191F','>\215-yC6j\208')]=true,[wd('u~\132\198=Xn\142\253,','2\v\237\137_')]=true,[wd('\167<\164\213\132\56\167\210\149','\240Y\197\190')]=true}
+    local nk,rc,Ye,Ve,ta,ab,cb,gk,tj,Ff=db[wd('\179DV\133b\183<\211\190XO\148m\166<\201','\208+;\245\3\197Y\186')]or function(Rk,Pb)
+        local gc,Ma,Qd,re,gd
+        re,gd={[-1664]=-29060,[14175]=13828,[27535]=3581,[-6613]=-29626,[-24866]=11511,[12302]=15373,[18227]=11511,[8791]=5380,[3111]=-17121},function(A)
+            return re[A-5626]
+        end
+        gc=gd(8737)
+        repeat
+            while true do
+                if gc==1.5695861600235177e-05*-1887503901 then
+                    db[wd('\127\134\182\143\215\132R\224h\138\166\158\209\130^\245u','\f\227\194\251\191\246\55\129')](4.2390015117143089e-09*1887236883)
+                    gc=gd(19801)
+                elseif gc==-742618233054/-207377334 then
+                    Qd=2295770038/1147885019
+                    gc=gd(-19240)
+                elseif gc==1.5394238346336952e-05*349481402 then
+                    return Ma;
+                elseif gc==-9282004760664/-603786168 then
+                    db[wd('Z\178\248\201D\174\2]M\190\232\216B\168\14HP',')\215\140\189,\220g<')](Qd)
+                    gc=gd(14417)
+                elseif gc==-2121922354- -2121936182 then
+                    Ma=db[wd('v\t@g\31V','\2p0')](Rk)==db[wd('\177\177\6\160\167\16','\197\200v')](Pb)and db[wd('\214\233\170\199\255\188','\162\144\218')](Rk)==wd('\194\146\236e\234\146\252t','\139\252\159\17')and kd(Rk)==kd(Pb)
+                    if db[wd('\179\50\192\27\180\235\244\151\164>\208\n\178\237\248\130\185','\192W\180o\220\153\145\246')]then
+                        gc=gd(17928)
+                        break
+                    end
+                    gc=2074872046+-2074866666
+                elseif gc==-815508339+815479279 then
+                    Qd=db[wd('\0\207\n4\176\213A\203\3\195\26%\182\211M\222\30','g\170~@\216\167$\170')]()
+                    gc=gd(23853)
+                elseif gc==1807079364+-1807096485 then
+                    if not(db[wd(wd('\186z\189I\157>\vk\185v\173X\155\56\a~\164',"r\'\17\168\17\132\152\231"),wd('\5sM:N\131cB','\170K\149\175'))])then
+                        gc=gd(33161)
+                        break
+                    else
+                        gc=gd(3962)
+                        break
+                    end
+                    gc=671554824948/58340268
+                elseif gc==1882103993+-1882092482 then
+                    if db[wd('\215\157\253\162\3\161\138\180\192\145\237\179\5\167\134\161\221','\164\248\137\214k\211\239\213')]then
+                        gc=gd(-987)
+                        break
+                    end
+                    gc=585807584+-585793756
+                end
+            end
+        until gc==1577004533-1576991364
+    end,hi(db[wd('BPHT','%1')]['GetService'](db[wd('BPHT','%1')],wd('(\195\153\1\202\138\v','x\175\248'))[wd('/\219\235\23\161\51\216\233\15\168\17','c\180\136v\205')]or db[wd('u\128\127\132','\18\225')]['GetService'](db[wd('u\128\127\132','\18\225')],wd('\149\29I\188\20Z\182','\197q('))['GetPropertyChangedSignal'](db[wd('u\128\127\132','\18\225')]['GetService'](db[wd('u\128\127\132','\18\225')],wd('\149\29I\188\20Z\182','\197q(')),wd('3\187\162k]/\184\160sT\r','\127\212\193\n1'))['Wait'](db[wd('u\128\127\132','\18\225')]['GetService'](db[wd('u\128\127\132','\18\225')],wd('\149\29I\188\20Z\182','\197q('))['GetPropertyChangedSignal'](db[wd('u\128\127\132','\18\225')]['GetService'](db[wd('u\128\127\132','\18\225')],wd('\149\29I\188\20Z\182','\197q(')),wd('3\187\162k]/\184\160sT\r','\127\212\193\n1')))),hi(db[wd('\225~\235z','\134\31')]['GetService'](db[wd('\225~\235z','\134\31')],wd('o\128DFpO\131Cvp','=\245*\21\21'))),hi(db[wd('OKEO','(*')]['GetService'](db[wd('OKEO','(*')],wd('0\0\2\0\16','ct'))),hi(db[wd('\151\f\157\b','\240m')]['GetService'](db[wd('\151\f\157\b','\240m')],wd('\192\148\143\230\188\136\234','\131\251\253'))),hi(db[wd('W\30]\26','0\127')]['GetService'](db[wd('W\30]\26','0\127')],wd('(\245i\207\2\139\173\b\t\213i\207=\140\190\24','}\134\f\189K\229\221}'))),hi(db[wd("\224\'\234#",'\135F')]['GetService'](db[wd("\224\'\234#",'\135F')],wd('\222{\22\226#\235x\22\210#','\153\14\127\177F'))),hi(db[wd('\14\206\4\202','i\175')]['GetService'](db[wd('\14\206\4\202','i\175')],wd('J\23\230\141\143f\160Y\n\231\143\131l\177{','\tx\136\249\234\b\212'))),hi(db[wd('\15\2\5\6','hc')]['GetService'](db[wd('\15\2\5\6','hc')],wd('9\251\48\\\4\15\253\22[\25','j\143Q.p'))),hi(db[wd('\235\230\225\226','\140\135')]['GetService'](db[wd('\235\230\225\226','\140\135')],wd('\144\202\26\185\195\t\179','\192\166{'))[wd(']\151\198\144iA\148\196\136\96c','\17\248\165\241\5')]['FindFirstChildWhichIsA'](db[wd('\235\230\225\226','\140\135')]['GetService'](db[wd('\235\230\225\226','\140\135')],wd('\144\202\26\185\195\t\179','\192\166{'))[wd(']\151\198\144iA\148\196\136\96c','\17\248\165\241\5')],wd('\238g\169\227\219y\143\239\215','\190\v\200\154')))
+    local wg=db[wd('\191\158\131','\251')]or db[wd('\173\220\53\20\225q\138\193\26\49\247z','\239\165Eu\146\2')]or db[wd('\229\232}\243\238e','\150\141\17')](-110878848/-55439424,...)or ta['FindFirstChild'](ta,wd('\213;x\129\232,]\152\238','\135T\26\237'))
+    repeat
+        db[wd('\28}\27w','h\28')][wd('\re\19p','z\4')]()
+    until db[wd('\20\234\30\238','s\139')]['IsLoaded'](db[wd('\20\234\30\238','s\139')])
+    if wg[wd('\17\v#$\4%','AjQ')][wd('8\153\27\157','v\248')]==wd('?\183\54\51\189=\15','{\210N')then
+        wg=wg[wd('Y #l/%','\tAQ')]
+    end
+    if db[wd('\163\252\232\181\250\240','\208\153\132')](-1219227150+1219227153,...)==true and hi(db[wd('\236g\230c','\139\6')])~=db[wd('\221\"\215&','\186C')]then
+        rf[wd('\227\200~)\192\204}.\209','\180\173\31B')]=false
+    end
+    local Sg,se,va,he,Ck,gh,Oh=db[wd('k\184ab\189g','\f\219\b')](),Ve[wd('\228\6\14*\134\189\206\r>1\146\189\217','\173h}^\231\211')],Ve['GetMemoryUsageMbForTag'](Ve,wd('\215\229\249','\144')),Ve['GetTotalMemoryUsageMb'](Ve),Ve[wd('\213\152*\254\55\3\v\232\227\176t\214\48\30\31\241\244','\128\209\24\186sqj\159')],Ve[wd("\'.\253\146\aL\242)\28\0\163\179\16Q\238&\6",'rg\207\214S>\155H')],function()
+        return((db[wd('\216d\193m','\181\5')][wd('\127v\151ix\148','\r\23\249')](-21276319740000000/-2127631974,442876741+557123259)*(506085198810/503567362))+-5.9037714001337382e-10*-846916261)/(100000565833723-565833723)
+    end;
+    local Jb={[wd('\218/\14\131\194+\20\146\226','\142Jv\247')]=Oh(),[wd('o\221>7DN\204\50,h',';\184FC\6')]=Oh(),[wd('\231p\192o\196','\161\2')]=Oh(),[wd('\195\164\214L>\211\191\211D4','\149\205\178)Q')]=Oh(),[wd('\f}f\144\191\190(\96E\149\174\188?','Z\20\3\231\207\209')]=Oh(),[wd('}\3E\194\252\172\139@\aq\223\241\173\135','.\96\55\173\144\192\226')]=Oh(),[wd('\134\189\19\207\19\131\177\16\205\26','\207\208r\168v')]=Oh(),[wd('\160X\222\254U\171@\203\237_\135','\233\53\191\153\48')]=Oh()}
+    if rf[wd('\245\185?s7%\184\149\156\163P\211\187.s0\14\184\149\177\151D','\178\220K>RH\215\231\229\246#')]or rf[wd('\216\15\165\206\227\234\242\4\149\213\247\234\229','\145a\214\186\130\132')]then
+        local Pg=cg(db[wd('\f\204\6\200','k\173')][wd('\166\176\213\52\246\240\16\132\187\197\17\253\247\0','\225\213\161p\147\131s')]);
+        db[wd('\228q\238u','\131\16')][wd('\204\162\52x\136&\173\233\169\51Z\137,\172\236','\136\199G\27\237H\201')]['Connect'](db[wd('\228q\238u','\131\16')][wd('\204\162\52x\136&\173\233\169\51Z\137,\172\236','\136\199G\27\237H\201')],function(Ml)
+            local Zf,Uh,Rc
+            Uh,Zf={[-24155]=-14887,[11425]=-24208,[-11246]=-10011,[18243]=-13262,[-9862]=-13262,[23951]=-13262,[-22959]=32359,[19002]=-10011,[-9736]=-24074,[-15524]=12911,[28087]=23263},function(kj)
+                return Uh[kj+-22356]
+            end
+            Rc=Zf(50443)
+            repeat
+                while true do
+                    if Rc==-940016938+940049297 then
+                        Rc=Zf(11110);
+                    elseif Rc==-15836386787471/-1226580961 then
+                        if not(Jb[Ml[wd(wd('\132\231v\219\180\197v\197\162','g6\249\29'),wd('\128b\206j',' \223'))]])then
+                            Rc=Zf(-603)
+                            break
+                        else
+                            Rc=Zf(33781)
+                            break
+                        end
+                        Rc=15425651632266/-1540870206
+                    elseif Rc==1651347498+-1651324235 then
+                        if not(not y(Ml,wg))then
+                            Rc=Zf(-1799)
+                            break
+                        else
+                            Rc=Zf(6832)
+                            break
+                        end
+                        Rc=Zf(40599)
+                    elseif Rc==-1600521865- -1600506978 then
+                        Rc=Zf(12494);
+                    elseif Rc==-3563785686813/355986983 then
+                        Ml=nil
+                        se+=1200008555-1200008554
+                        Rc=Zf(46307)
+                    elseif Rc==-18106442758690/1365287495 then
+                        Rc=Zf(12620);
+                        break;
+                    elseif Rc==2.4339642245083574e-05*-994591447 then
+                        va+=Jb[Ml[wd('j\15\130\53Z-\130+L',')c\227F')]]
+                        Rc=Zf(41358)
+                    end
+                end
+            until Rc==1520820923+-1520844997
+        end);
+        db[wd('\152\14\146\n','\255o')][wd('\147\v\164\130MMo\223\233\163<\178\140GUb\208\224','\215n\215\225(#\v\190\135')]['Connect'](db[wd('\152\14\146\n','\255o')][wd('\147\v\164\130MMo\223\233\163<\178\140GUb\208\224','\215n\215\225(#\v\190\135')],function(Gf)
+            local ic,le,jg,Vg
+            ic,jg={[-9182]=-32476,[18993]=-9470,[-15607]=-14787,[7826]=-9470,[-31549]=-13292,[16631]=-19014,[-19157]=-19014,[24315]=-26794,[-17496]=-22844,[-31012]=5496,[-25476]=-16967,[-16060]=6751},function(ya)
+                return ic[ya- -3141]
+            end
+            Vg=jg(-19201)
+            repeat
+                while true do
+                    if Vg==19611567564144/-731938776 then
+                        Vg=jg(-22298);
+                    elseif Vg==-8841324032013/-1309631763 then
+                        if not y(Gf,wg)then
+                            Vg=jg(-20637)
+                            break
+                        end
+                        Vg=1781413199-1781445675
+                    elseif Vg==3.1878141493400073e-06*1724065376 then
+                        db[wd('\194\164\197\174','\182\197')][wd("\252\'\226\50",'\139F')](db[wd('R K)','?A')][wd('/]\171\57S\168',']<\197')]())
+                        se-=-204909119+204909120
+                        Vg=jg(13490)
+                    elseif Vg==-1737912136+1737879660 then
+                        Vg=jg(-34690);
+                        break;
+                    elseif Vg==-1365846022+1365836552 then
+                        se-=1822716274-1822716273
+                        if not(db[wd(wd('\215k\206b','\241\161'),wd('\170J','\225'))][wd(wd('\217+T\207%W','\189\15-'),wd('-~,',';'))]((2.3171715187838005/2130491588)*(2082632353-243759770))==(-1509552074+-1229284918)/(-2907691229+1538272733))then
+                            Vg=jg(21174)
+                            break
+                        else
+                            Vg=jg(-34153)
+                            break
+                        end
+                        Vg=-1247785330+1247766316
+                    elseif Vg==23136805551372/-1012817613 then
+                        le=Jb[Gf[wd('gz\129MWX\129SA','$\22\224>')]]
+                        Gf=nil;
+                        db[wd('V8Q2','\"Y')][wd('\217+\199>','\174J')](db[wd('\240*\233#','\157K')][wd('\156\50\209\138<\210','\238S\191')]())
+                        if not(le)then
+                            Vg=jg(-28617)
+                            break
+                        else
+                            Vg=jg(-18748)
+                            break
+                        end
+                        Vg=-9098974595370/960820971
+                    elseif Vg==1.0256200605529773e-05*-1441761971 then
+                        va-=le
+                        Vg=jg(4685)
+                    elseif Vg==1.2248186759145822e-05*-1552393050 then
+                        Vg=jg(-12323)
+                    elseif Vg==-1426479778+1426462811 then
+                        Vg=jg(15852);
+                    end
+                end
+            until Vg==172268277+-172281569
+        end)
+        local q;
+        local Ej=db[wd('\nT\243\20i\b^\247\2x\1','d1\132w\n')](function(...)
+            local pf,lj,Ta,eh
+            Ta,lj={[31321]=12521,[-19044]=1133,[23800]=31927,[15690]=1133,[-7557]=12521,[27911]=-20387,[24458]=19284},function(De)
+                return Ta[De+4909]
+            end
+            eh=lj(19549)
+            repeat
+                while true do
+                    if eh==-21189563192976/-1098815764 then
+                        pf=q(...)
+                        if not Yd()and db[wd('\22Zg\aLq','b#\23')](pf)==wd('\135\247\127$\175\247o5','\206\153\fP')and pf[wd('\154\25=\175\22;','\202xO')]==nil then
+                            eh=lj(18891)
+                            break
+                        end
+                        eh=lj(-23953)
+                    elseif eh==4.3652781806030947e-05*286831663 then
+                        se+=#Pg(pf)+(1860264902+-1860264901)
+                        eh=lj(10781)
+                    elseif eh==-1.7537972353723094e-05*-1820449899 then
+                        if Jb[pf[wd('\147}\242\183\163_\242\169\181','\208\17\147\196')]]then
+                            eh=lj(23002)
+                            break
+                        end
+                        eh=lj(26412)
+                    elseif eh==6.63936258007866e-07*1706489119 then
+                        return pf
+                    elseif eh==1272479927+-1272500314 then
+                        va+=Jb[pf[wd('\241\207\249\213\193\237\249\203\215','\178\163\152\166')]]
+                        eh=lj(-12466)
+                    end
+                end
+            until eh==-1773895841- -1773887573
+        end)
+        q=Li(db[wd('\146\\\152X','\245=')][wd('\215\254\251\252\241','\148\146')],Ej);
+        Li(db[wd('\236\176\230\180','\139\209')][wd('o\fc\14i','\f\96')],Ej)
+        local Ce;
+        Ce=mj(db[wd('&\241,\245','A\144')],wd('\188\146\219(\197\134\174\212%\196','\227\205\181I\168'),function(...)
+            local tc,of,Lj,self,pk
+            pk,tc={[-22698]=-18167,[13404]=27077,[-16305]=-3890},function(ed)
+                return pk[ed+-26180]
+            end
+            Lj=tc(9875)
+            repeat
+                while true do
+                    if Lj==1417388334+-1417406501 then
+                        return Ej(...)
+                    elseif Lj==1067259069-1067262959 then
+                        self=...
+                        of=la()
+                        if not Yd()and db[wd('\15\52\n\30\"\28','{Mz')](self)==wd(' \15\218\56\b\15\202)','ia\169L')and(of==wd('\144=\188?\182','\211Q')or of==wd('#\253/\255%','@\145'))then
+                            Lj=tc(3482)
+                            break
+                        end
+                        Lj=-425020193- -425047270
+                    elseif Lj==22218732777836/820575868 then
+                        return Ce(...)
+                    end
+                end
+            until Lj==1740626170+-1740658511
+        end)
+        local e,vc;
+        e=Li(bh()[wd('\2\\\173\142*\\\189\159','K2\222\250')][wd('\158\149\135','\240')],function(...)
+            local bd,ec,yj,ke
+            ke,bd={[-12617]=26770,[-28377]=26770,[-8575]=31966,[16532]=12015,[5047]=-20179,[-23726]=31608,[31929]=-26878},function(kh)
+                return ke[kh+-32702]
+            end
+            ec=bd(64631)
+            repeat
+                while true do
+                    if ec==1839760538+-1839787416 then
+                        yj=e(...)
+                        if not Yd()and db[wd('\187\240v\170\230\96','\207\137\6')](yj)==wd('hd\178k@d\162z','!\n\193\31')then
+                            ec=bd(49234)
+                            break
+                        end
+                        ec=-2029398278- -2029430244
+                    elseif ec==4.362545949041096e-05*-462551002 then
+                        va+=Jb[yj[wd('k\253\51E[\223\51[M','(\145R6')]]
+                        ec=bd(4325)
+                    elseif ec==46247503588450/1727586985 then
+                        se+=-181358428- -181358429
+                        ec=bd(24127)
+                    elseif ec==-1846998907- -1847030873 then
+                        return yj
+                    elseif ec==-1.1043578081355878e-05*-1087962607 then
+                        if not(Jb[yj[wd(wd('8%\20I\b\a\20W\30','Q\134\223I'),wd('\173\186-\6','\135u'))]])then
+                            ec=bd(8976)
+                            break
+                        else
+                            ec=bd(37749)
+                            break
+                        end
+                        ec=20445448376310/763744803
+                    elseif ec==-5.8378422836981502e-05*-541432921 then
+                        ec=bd(20085);
+                    end
+                end
+            until ec==1191815132949/1465947273
+        end)
+        vc=Li(bh()[wd('\127\53\249\175W5\233\190','6[\138\219')][wd('\209)\182\170k\151\222(\173\174@\136','\183[\217\199.\239')],function(...)
+            local km,If,oh,Wc
+            km,oh={[-19482]=-12265,[-1925]=-22437,[27003]=2559,[-28555]=20102,[31358]=-14213,[28903]=19844,[9846]=-14213,[-25314]=-12265,[-18175]=-342},function(ym)
+                return km[ym+-29983]
+            end
+            If=oh(11808)
+            repeat
+                while true do
+                    if If==-316577254554/925664487 then
+                        Wc=vc(...)
+                        if not(not Yd()and db[wd(wd('\243\27\228\226\r\242','l\194\215'),wd('\173\230\5','F'))](Wc)==wd(wd('\1C\164\187)C\180\170','\255\244X\242'),wd('\167\209\159\53','\16\b')))then
+                            If=oh(58886)
+                            break
+                        else
+                            If=oh(1428)
+                            break
+                        end
+                        If=545532294+-545546507
+                    elseif If==-1722276234+1722263969 then
+                        se+=345976920/345976920
+                        If=oh(61341)
+                    elseif If==1137781348-1137803785 then
+                        If=oh(10501);
+                    elseif If==8281403034036/-582663972 then
+                        return Wc
+                    elseif If==-13455098430662/-669341281 then
+                        if not(Jb[Wc[wd(wd('\159\3\182\147\175!\182\141\185','\149\15GF'),wd('\145DH\130','\216$'))]])then
+                            If=oh(28058)
+                            break
+                        else
+                            If=oh(56986)
+                            break
+                        end
+                        If=2.497424725465471e-05*-491105893
+                    elseif If==398911967+-398909408 then
+                        va+=Jb[Wc[wd('\0\t\165l0+\165r&','Ce\196\31')]]
+                        If=oh(4669)
+                    elseif If==-9809177553164/-494314531 then
+                        If=oh(39829);
+                    end
+                end
+            until If==-1.3775741369988302e-05*1121318961
+        end)
+    end
+    if not(rf[wd(wd("/\249U\143\219\207\54>\25\209\v\167\220\210\"\'\14",'\206\128\r9w\145\170T'),wd('\14\179\198\6R\175Q\233','\186\131\172\244'))]or rf[wd(wd('\19Z\196E\26\238:\185(t\154d\r\243&\182\50','o\228\213\19\128$\165\n'),wd('\19\130\54\223\244\205\227\31',':u\21\205'))])then
+    else
+        local Og,Je,Od
+        Je,Og={[-1436]=-15756,[15322]=31340},function(ka)
+            return Je[ka+-3929]
+        end
+        Od=Og(19251)
+        repeat
+            while true do
+                if Od==54015256388360/1723524454 then
+                    db[wd('\n\241\r\251','~\144')][wd('u\148}\144h','\17\241')](db[wd('\156\250\133\243','\241\155')][wd('\165?\1\179\49\2','\215^o')]()*(223915368.5-223915367),function()
+                        local R,cl=Ck,gh
+                        while db[wd('\234\161\237\171','\158\192')][wd('\r\131\19\150','z\226')](db[wd('\153\147\128\154','\244\242')][wd(':TQ,ZR','H5?')]()*(1.0235272162386196e-09*1465520385))do
+                            Ck+=db[wd('\"\28;\21','O}')][wd('\255\223G\233\209D','\141\190)')](-(-1766166500- -1766166504),-2.1933989025040159e-09*-1823653689)
+                            gh+=db[wd('\a\140\30\133','j\237')][wd('(Zt>Tw','Z;\26')](-(745236416/186309104),646676826+-646676822)
+                            if db[wd('oevl','\2\4')][wd('\130\132\170\148\138\169','\240\229\196')](413422752-413422742)==-493880990+493881000 then
+                                Ck=db[wd('\30\209\a\216','s\176')][wd('\148\151\134','\245')](R+db[wd('\218\202\195\195','\183\171')][wd('\bG\226\30I\225','z&\140')](-(1120031913-1120031905),-761945358+761945366))
+                                gh=db[wd('\238M\247D','\131,')][wd('\129\130\147','\224')](cl+db[wd('R\169K\160','?\200')][wd('\217\193\176\207\207\179','\171\160\222')](-(1257792916+-1257792908),6.3726901016731877e-09*1255356823))
                             end
                         end
                     end)
-
-                    return res
+                    Od=Og(2493)
+                    break
                 end
             end
-
-            return h(...)
+        until Od==1.3403950133895815e-05*-1175474382
+    end
+    if rf[wd('\214\55\190\223\50\184','\177T\215')]then
+        local pe;
+        pe=Li(bh()[wd('H\226^\239Y','<\131')][wd('I\165\148K\163\148','*\215\241')],function(...)
+            local Dl,_m,Ea,ph,Gh
+            ph,Dl={[18824]=-8403,[-25323]=-8403,[28879]=30479,[25839]=-11085},function(mf)
+                return ph[mf+-20384]
+            end
+            _m=Dl(46223)
+            repeat
+                while true do
+                    if _m==-13603875268713/1618930771 then
+                        return pe(...)
+                    elseif _m==488210451+-488179972 then
+                        Sg+=db[wd('{\0b\t','\22a')][wd('\128\133\138\140','\227\224')](Ea/(-1246547317- -1246548317))
+                        _m=Dl(39208)
+                    elseif _m==-1834835960+1834824875 then
+                        Ea,Gh=...
+                        if not Yd()and db[wd('$\a%5\17\51','P~U')](Ea)==wd('\230\145\251\234\129\228','\136\228\150')and Ea>-1111386148- -1111386148 and Ea<=(-1449771632- -1449771634)^(-2.8888365688488086e-06*-9000163)and Gh then
+                            _m=Dl(49263)
+                            break
+                        end
+                        _m=Dl(-4939)
+                    end
+                end
+            until _m==126097167+-126118061
+        end)
+    end;
+    db[wd('\31\183\24\189','k\214')][wd('$U6R9','W%')](function()
+        if not(not rf[wd(wd('Q\167\141X\162\139','.\180\182'),wd('\252\148\182','\228'))])then
+        else
+            return
+        end
+        local gb,Bd;
+        gb=db[wd('rz\175{\127\169','\21\25\198')]()+db[wd('\136\144\145\153','\229\241')][wd('S\177\26E\191\25','!\208t')](db[wd('\134\160\159\169','\235\193')][wd('_\27V\24K','9w')](db[wd('\197\152\183\204\157\177','\162\251\222')]()/(-1.9976707159452079e-07*-25029150)),db[wd('\184|\161u','\213\29')][wd('e\14l\rq','\3b')](db[wd('S\206ZZ\203\\','4\173\51')]()/(387300271+-387300269)))
+        Bd=db[wd('D\154\158M\159\152','#\249\247')]()-db[wd('7\190.\183','Z\223')][wd('\141+H\155%K','\255J&')](db[wd('\24\155\1\146','u\250')][wd('\220<\213?\200','\186P')](db[wd('\232\194P\225\199V','\143\161\57')]()/(5011965525/1002393105)),db[wd('*\182\51\191','G\215')][wd('K B#_','-L')](db[wd('\237\238\176\228\235\182','\138\141\217')]()/(-1.3276557894852676e-09*-1506414551)))
+        Sg=db[wd('\14N^\aKX','i-7')]()
+        local function P()
+            local za,Bb,je,Lh,Il,Tl,il,Wf
+            il,Il={[-2452]=-27540,[17465]=-11879,[23304]=-11879,[16034]=-11879,[-2820]=22352,[-29201]=13515,[16442]=-9657},function(Ie)
+                return il[Ie+-13686]
+            end
+            za=Il(30128)
+            repeat
+                while true do
+                    if za==278223706-278243803 then
+                        if(Bb>=0 and je>Wf)or((Bb<0 or Bb~=Bb)and je<Wf)then
+                            za=Il(31151)
+                        else
+                            za=Il(-15515)
+                        end
+                    elseif za==213169421+-213179078 then
+                        Lh=db[wd('\164A\189H','\201 ')][wd('\132\30\163\146\16\160','\246\127\205')](-1310911544+1310911559,1706140915-1706140893)
+                        Bb,Wf,je=1,Lh,6.1998368565009845e-10*1612945668
+                        za=-7347099930658/-775092302
+                    elseif za==-1011377518+1011365639 then
+                        za=Il(11234);
+                        break;
+                    elseif za==1283305808-1283283456 then
+                        je=je+Bb;
+                        Tl=je;
+                        if je~=je then
+                            za=Il(29720)
+                        else
+                            za=-3.3700229002589128e-05*596346096
+                        end
+                    elseif za==-1040968112- -1040981627 then
+                        Sg=gb-db[wd('\249\192\224\201','\148\161')][wd('d\250m\249p','\2\150')](((gb-Bd*(-839724576.75- -839724578))*(Tl/Lh))+db[wd('voof','\27\14')][wd('!\14j7\0i','So\4')](-(899674728+-899674698),1742894211-1742894181));
+                        db[wd('\n\198\r\204','~\167')][wd('\180\\\170I','\195=')](db[wd('\182\144\175\153','\219\241')][wd('\25\1\249\15\15\250','k\96\151')](1019452638-1019452613,-1590457122- -1590457167)/(787034254-787033254))
+                        za=Il(10866)
+                    elseif za==1086211395+-1086201916 then
+                        Tl=je;
+                        if Wf~=Wf then
+                            za=Il(36990)
+                        else
+                            za=-3330651030399/165728767
+                        end
+                    end
+                end
+            until za==-1335263411- -1335235871
+        end
+        local yd=Ve[wd('6OG5\232Z\28Dw.\252Z\v','\127!4A\137\52')]
+        local Cm=yd+db[wd('{Rb[','\22\51')][wd('\136~>\158p=','\250\31P')](-1418227638- -1418228638,-1419948373- -1419953373);
+        db[wd('\184\146\191\152','\204\243')][wd('\184\51\170\52\165','\203C')](function()
+            local x,gf,Db,sg,Id
+            Db,x={[-13990]=-5091,[27684]=-2816,[-31301]=-23223,[-19856]=-26234,[31705]=-608,[-28814]=8641,[-25467]=-32317,[-25525]=-15799,[2788]=-32317,[-15530]=-23223,[-14270]=19037,[-8022]=-29384},function(Wd)
+                return Db[Wd- -10393]
+            end
+            Id=x(-18415)
+            repeat
+                while true do
+                    if Id==61918893393168/-2107231602 then
+                        Id=x(-25923);
+                    elseif Id==-430585808+430553491 then
+                        Sg+=db[wd('\246\130\239\139','\155\227')][wd('\21\202\28\201\1','s\166')](db[wd('[\168B\161','6\201')][wd('\23\203Z\1\197Y','e\170\52')](yd,Cm)/(1848898795-1848883795))
+                        Id=-1617888689- -1617883598
+                    elseif Id==2073436781+-2073463015 then
+                        if db[wd('\156:\139\56','\232S')]()-gf>sg/(-2035374928/-1017687464)then
+                            Id=x(21312)
+                        else
+                            Id=x(-24383)
+                        end
+                    elseif Id==-676052844+676061485 then
+                        Id=x(17291);
+                        break;
+                    elseif Id==-1529107003+1529095584 then
+                        sg,gf=db[wd('o\234h\224','\27\139')][wd('\127\4a\17','\be')](),db[wd('\251\173\236\175','\143\196')]()
+                        if not(Sg>gb+db[wd(wd('\177\\\168U','\152\186'),wd('\186y','\254'))][wd(wd('G\165\203Q\171\200','\168\221\171'),wd('?\187\172','\162'))](-((-27248730007-710456768)/(-0.48099828053209293*775032203)),(1.5329878592299703e+20/1050878432)/(358946165- -1586077874)))then
+                            Id=x(-35918)
+                            break
+                        else
+                            Id=x(-24663)
+                            break
+                        end
+                        Id=-26765391547147/828213991
+                    elseif Id==-349472760- -349449537 then
+                        if true then
+                            Id=-6214047064787/544184873
+                        else
+                            Id=x(-39207)
+                        end
+                    elseif Id==4.6882890836802063e-07*-1296848358 then
+                        Sg+=db[wd('!\158\56\151','L\255')][wd('\t\221\141\31\211\142','{\188\227')](0*574437627,db[wd('\231\155\254\146','\138\250')][wd('s\223z\220g','\21\179')](db[wd('w\16n\25','\26q')][wd('%?\249\51\49\250','W^\151')](yd,Cm)/(-38437968+38452968)));
+                        db[wd('\22\234\17\224','b\139')][wd('\174T\176A','\217\53')]()
+                        Sg+=db[wd('I7P>','$V')][wd('N}G~Z','(\17')](db[wd('0\144)\153',']\241')][wd('\219\240\f\205\254\15','\169\145b')](yd,Cm)/(8922528940000/446126447))
+                        Id=x(-41694)
+                    elseif Id==687150755-687155846 then
+                        Id=x(-30249);
+                    elseif Id==-2140974938- -2140959139 then
+                        Id=x(-7605);
+                    elseif Id==192046481+-192027444 then
+                        P()
+                        Id=x(-35860)
+                    end
+                end
+            until Id==-1858136293376/659849536
+        end)
+        local bl;
+        bl=Li(bh()[wd('\222m\31\215h\25','\185\14v')],function(...)
+            local Dd,ak,mh
+            ak,Dd={[-10205]=10471,[-25652]=31770,[-12915]=10471,[28660]=-29598,[12639]=10471,[-26166]=-26152},function(Wi)
+                return ak[Wi-23221]
+            end
+            mh=Dd(-2945)
+            repeat
+                while true do
+                    if mh==-0.00089782443652552924*32966356 then
+                        return Sg
+                    elseif mh==-1724018957+1724050727 then
+                        mh=Dd(35860);
+                    elseif mh==-1487502342- -1487476190 then
+                        if not(not Yd())then
+                            mh=Dd(-2431)
+                            break
+                        else
+                            mh=Dd(51881)
+                            break
+                        end
+                        mh=Dd(13016)
+                    elseif mh==1.9444636411714911e-05*538503255 then
+                        return bl(...)
+                    end
+                end
+            until mh==-484940977+484920334
+        end)
+        local Ac;
+        Ac=Li(bh()[wd('\225\225\183T\147\143\23\229\239\169Z\151\139\6','\130\142\219\56\246\236c')],function(...)
+            local vl,sk,vb,rh
+            vb,sk={[29099]=-1124,[-1215]=14754,[-8583]=14754,[-23265]=-8435,[-15123]=12096},function(Fd)
+                return vb[Fd+-11094]
+            end
+            vl=sk(-4029)
+            repeat
+                while true do
+                    if vl==-3.2021141337517491e-06*351018094 then
+                        return Sg
+                    elseif vl==-19372535646912/-1601565447 then
+                        rh=...
+                        if not(not Yd()and db[wd(wd('\169\\\164\184J\178','\187a\171'),wd('\141\175\148','\235'))](rh)==wd(wd('\164\187%\190\161\48','2kc'),wd('\170\235{','O'))and db[wd(wd('\229y\179\255c\166','w\255&'),wd(' 3&','\193'))][wd(wd('\26\177\5\168\29','9\133'),wd('bv','2'))](rh,wd(wd('J','('),wd('3','Q')))[(1244566488-971580755)-(-1173665094- -1446650826)]==wd(wd('\255h\233i\232','\28\150'),wd('\192\209','@')))then
+                            vl=sk(-12171)
+                            break
+                        else
+                            vl=sk(40193)
+                            break
+                        end
+                        vl=-23840969198490/-1615898685
+                    elseif vl==910471334+-910456580 then
+                        return Ac(...)
+                    elseif vl==-441407855- -441399420 then
+                        vl=sk(2511);
+                    end
+                end
+            until vl==-982452615+982435913
+        end)
+    end);
+    db[wd('\207@\200J','\187!')][wd('%!7&8','VQ')](function()
+        if not(not rf[wd(wd('L|\196Q(\184l\222\209\138fv\194|\18\191l\213\249\162i','l\n\165\151\21gs3\253\180'),wd('\177\132\171\191\31}\233?L\22','\214\151\190-M'))])then
+        else
+            return
+        end;
+        db[wd('wFpL',"\3\'")][wd(';\180)\179&','H\196')](function()
+            local La,kf,hc,te
+            hc,kf={[24015]=-26031,[-25212]=21278,[18481]=21278,[20858]=-11802,[-6837]=8321},function(ge)
+                return hc[ge+-30252]
+            end
+            te=kf(23415)
+            repeat
+                while true do
+                    if te==-13250248628908/-622720586 then
+                        if Ye[wd('\16C\147\128,D\151\147,','X&\242\242')]['Wait'](Ye[wd('\16C\147\128,D\151\147,','X&\242\242')])then
+                            te=2084977309-2084983859
+                        else
+                            te=kf(51110)
+                        end
+                    elseif te==6792734260769/816336289 then
+                        La=false
+                        te=kf(5040)
+                    elseif te==-1822122492+1822115942 then
+                        La=not La
+                        he+=(db[wd('\n\247\19\254','g\150')][wd('{\6\154m\b\153','\tg\244')](-(74731082-74731080),-581619318+581619320)/(if La then 4.4313680681244849e-08*722124624 else 1377264966-1377264902))-(db[wd("\'\159>\150",'J\254')][wd('\128H\96\150Fc','\242)\14')](-(-1679803478- -1679803479),1944190419/1944190419)/(-1.3492810755513443e-09*-1482270845));
+                        db[wd('\245b\242h','\129\3')][wd('._0J','Y>')](db[wd(']\175D\166','0\206')][wd('NP\157X^\158','<1\243')](-907653202/-907653202,2029735041-2029735038)/(-8.522011246240688e-08*-1056088726))
+                        te=kf(48733)
+                    elseif te==-1849822308+1849810506 then
+                        te=kf(54267);
+                        break;
+                    end
+                end
+            until te==24027552016263/-923036073
+        end)
+        local _g;
+        _g=mj(db[wd('\209\29\219\25','\182|')],wd("\'?\24\224=\29\3\23\237<",'x\96v\129P'),function(...)
+            local self,oj,Ga,ud,ch
+            Ga,oj={[6556]=25243,[17547]=-30920,[-26881]=22148,[4291]=22148,[21423]=22148,[-22598]=-29976},function(pd)
+                return Ga[pd+-29493]
+            end
+            ch=oj(6895)
+            repeat
+                while true do
+                    if ch==0.0014315283717702709*15471576 then
+                        return _g(...)
+                    elseif ch==-1875205594+1875175618 then
+                        self=...
+                        ud=db[wd('\146\190\239\136\164\250','\225\202\157')][wd('<\226.\243','[\145')](la(),wd('\245\142\222','\171'),db[wd('\132h\190\158r\171','\247\28\204')][wd('\0\31\27\21\30','lp')])
+                        if not(not Yd()and db[wd(wd('\236\222\253\253\200\235','\129U\177'),wd('~\149[','g'))](self)==wd(wd("\198\239\166\'\238\239\182\54",'I\137\\\211'),wd('#\1l\137','\229\t'))and nk(self,Ve)and ud==wd(wd('\27\156_&u\236\176d\227\220\17\150Y\vO\235\176o\203\244\30','\163\131\55O\189\133\18\206\209x'),wd('\139AD\149zI\248\158\215\28','T;X\168\221')))then
+                            ch=oj(36049)
+                            break
+                        else
+                            ch=oj(47040)
+                            break
+                        end
+                        ch=oj(50916)
+                    elseif ch==1.9841143590743749e-05*-1558377916 then
+                        return he
+                    elseif ch==43363060412908/1717825156 then
+                        ch=oj(33784);
+                    end
+                end
+            until ch==9.6399949360405884e-06*-1846681468
+        end)
+        local bj;
+        bj=Li(Ve[wd('F\218c\241O\237\137\145\183\222l\208e\220u\234\137\154\159\246c','\1\191\23\165 \153\232\253\250\187')],function(...)
+            local self,qg,G,Va
+            Va,G={[-10128]=-14374,[17958]=3524,[-23382]=-14374,[14419]=2120},function(Fa)
+                return Va[Fa-3384]
+            end
+            qg=G(17803)
+            repeat
+                while true do
+                    if qg==1534645599+-1534659973 then
+                        return bj(...)
+                    elseif qg==1943021517-1943017993 then
+                        return he
+                    elseif qg==-2836245377160/-1337851593 then
+                        self=...
+                        if not Yd()and db[wd('I\141\182X\155\160','=\244\198')](self)==wd('5\210\"\207\29\210\50\222','|\188Q\187')and nk(self,Ve)then
+                            qg=G(21342)
+                            break
+                        end
+                        qg=G(-6744)
+                    end
+                end
+            until qg==3915210022848/-357945696
+        end)
+    end);
+    db[wd('H\143O\133','<\238')][wd('\205\250\223\253\208','\190\138')](function()
+        if not rf[wd('\217M5\227\188\223tvq\f\17\255O$\227\187\244tv\\8\5','\158(A\174\217\178\27\4\bYb')]then
+            return
+        end
+        local Kg=db[wd('\173\a\157\4','\232i')][wd("p\156\17N\152V\168\'_y\156\nD\134@\140#J",'4\249g+\244\57\216B-')][wd('pB^','7')]
+        local function Ug(Eh)
+            return(db[wd('\142\177\192\159\167\214','\250\200\176')](Eh)==wd('\148\181DX\152\175TX','\209\219\49\53')and Eh==Kg)or(db[wd('\152\198\96\137\208v','\236\191\16')](Eh)==wd('\t\28k\19\6~','zh\25')and db[wd('\252\200/\230\210:','\143\188]')][wd('\236\1\243\24\235','\159q')](Eh,wd('\127','\127'))[184511591/184511591]==wd('\\nr','\27'))
+        end;
+        db[wd('\213/\210%','\161N')][wd('DqVvY','7\1')](function()
+            local ki,ol,nb,Xl
+            ol,ki={[11806]=-2799,[-2077]=22390,[19036]=9571,[-21933]=-9805,[-27982]=15007,[18680]=22402,[-18504]=17706},function(c)
+                return ol[c+32630]
+            end
+            Xl=ki(-51134)
+            repeat
+                while true do
+                    if Xl==-20923690765488/-934009944 then
+                        nb=not nb
+                        va+=db[wd('\226\248\251\241','\143\153')][wd('Il!_b\"',';\rO')](-(-1108146736- -1108146738),-9.7181454534557858e-09*-205800583)/(if nb then 1441869752-1441869688 else-115967110- -115967238)+(db[wd('\226Z\251S','\143;')][wd('\22\r\232\0\3\235','dl\134')](-(1039936571/1039936571),933828294+-933828293)/(-1459089072- -1459089092));
+                        db[wd('>\158\57\148','J\255')][wd('\205\172\211\185','\186\205')](db[wd('\146\162\139\171','\255\195')][wd('b\214\20t\216\23','\16\183z')](-5.2956920597348067e-10*-1888327321,1700011289+-1700011286)/(-158940130050/-1766001445))
+                        Xl=ki(-54563)
+                    elseif Xl==17108228031430/-1744847326 then
+                        Xl=ki(-60612)
+                    elseif Xl==881876524509/92140479 then
+                        if db[wd('\160\54\185?','\205W')][wd('\18%\202\4+\201','\96D\164')](9.1241233634654128e-10*1095995703,-6.5897029775731056e-09*-1517519080)<2.1812579427690528e-09*1375353158 then
+                            Xl=ki(-13950)
+                            break
+                        end
+                        Xl=-1751433666+1751423861
+                    elseif Xl==-15142413053282/-1009023326 then
+                        if Ye[wd('4\169O=\b\174K.\b','|\204.O')]['Wait'](Ye[wd('4\169O=\b\174K.\b','|\204.O')])then
+                            Xl=ki(-13594)
+                        else
+                            Xl=ki(-20824)
+                        end
+                    elseif Xl==-4.7882071147992777e-05*-369783503 then
+                        nb=false
+                        Xl=21843159989926/1455531418
+                    elseif Xl==-1765233283+1765230484 then
+                        Xl=ki(-34707);
+                        break;
+                    end
+                end
+            until Xl==1894111493-1894089103
+        end)
+        local Fh;
+        Fh=mj(db[wd('\24\132\18\128','\127\229')],wd('\239K!+\r\213w.&\f','\176\20OJ\96'),function(...)
+            local qc,rd,Oc,ai,dd,self
+            Oc,qc={[-15914]=25290,[-31524]=-7207,[-29855]=25290,[-8761]=23392,[12412]=32562},function(Bi)
+                return Oc[Bi- -16365]
+            end
+            rd=qc(-3953)
+            repeat
+                while true do
+                    if rd==1983435051+-1983402489 then
+                        self,ai=...
+                        dd=db[wd('\221\146]\199\136H','\174\230/')][wd('\137V\155G','\238%')](la(),wd('F=m','\24'),db[wd('\242ja\232pt','\129\30\19')][wd('\242\252\233\246\236','\158\147')])
+                        if not(not Yd()and db[wd(wd('\131\250\190\146\236\168','\237\22\230'),wd('B\205p','X'))](self)==wd(wd('\136\t#\n\160\t3\27','\4i\20\153'),wd('k\202\234#','\174\196'))and nk(self,Ve)and dd==wd(wd('\28\24\208\49\168U\146M&\30\188\26\26\193\49\175~\146M\v*\168','\154\193\3\236\6\226\135\r\22\52U'),wd('RG\168$\153i\129=\253-)','\179\251\15\180R'))and Ug(ai))then
+                            rd=qc(-47889)
+                            break
+                        else
+                            rd=qc(-25126)
+                            break
+                        end
+                        rd=-704716876440/-27865436
+                    elseif rd==1.2422693104708834e-05*1883005545 then
+                        return va
+                    elseif rd==290865938+-290873145 then
+                        rd=qc(-32279);
+                    elseif rd==-3004080843960/-118785324 then
+                        return Fh(...)
+                    end
+                end
+            until rd==1.0530940541621746e-05*-1691966632
+        end)
+        local Ne;
+        Ne=Li(Ve[wd('\128{\211\96)\1~a?q\203\166y\194\96.*~a\18E\223','\199\30\167-Ll\17\19F$\184')],function(...)
+            local C,ha,ll,yb,self
+            ha,C={[-12959]=-27853,[-9359]=2701,[23448]=2701,[21305]=17731},function(Ed)
+                return ha[Ed+19540]
+            end
+            yb=C(1765)
+            repeat
+                while true do
+                    if yb==-1.510419337379541e-05*1844057429 then
+                        return va
+                    elseif yb==-1.3282578357341352e-06*-2033490733 then
+                        return Ne(...)
+                    elseif yb==-18557733726798/-1046626458 then
+                        self,ll=...
+                        if not Yd()and db[wd('\255nL\238xZ','\139\23<')](self)==wd('\166&\240\195\142&\224\210','\239H\131\183')and nk(self,Ve)and Ug(ll)then
+                            yb=C(-32499)
+                            break
+                        end
+                        yb=C(-28899)
+                    end
+                end
+            until yb==534839493-534857309
+        end)
+    end);
+    db[wd('r\246u\252','\6\151')][wd('\208P\194W\205','\163 ')](function()
+        if not rf[wd('\127F\24Xb\249Ku\14Mc\251','/4}4\r\152')]then
+            return
+        end
+        local Fj,Rh,yl,Ik,rl={},{},{},db[wd("\235\'\28\179\222\24\6\165\222",'\170To\214')]or{wd('!\218\137\159\133\"$jM\28[\17|\137\198\201\192hv(\17JU\b','S\184\241\254\246QA\30$xa>')},{}
+        for r,Yb in db[wd('\253\238\228\253\254','\141\143')](Ik)do
+            rl[Yb]=gk['GetAssetFetchStatus'](gk,Yb)
+        end;
+        db[wd('\198*\138\176\14\227\212;\159\191\a\242','\181O\254\221k\151')](Ik,{[wd('<\153\179r\17\n\168\185r\30','c\198\221\23f')]=function(Cc,Hd,Rb)
+            db[wd('L?tM;w','>^\3')](Ik,Hd,Rb);
+            db[wd('MwQLsR','?\22&')](rl,Rb,gk['GetAssetFetchStatus'](gk,Rb))
+        end});
+        gk['PreloadAsync'](gk,{db[wd('.O$K','I.')]},function(Xk)
+            db[wd('m\139{\134|','\25\234')][wd('\233@\132\229\\\131','\128.\247')](Fj,Xk)
+        end);
+        gk['PreloadAsync'](gk,{ta},function(Rg)
+            db[wd('S\177E\188B',"\'\208")][wd('3\165\199?\185\192','Z\203\180')](Rh,Rg)
+        end);
+        gk['PreloadAsync'](gk,{wg},function(Dh)
+            db[wd('\175i\185d\190','\219\b')][wd('\1\223Q\r\195V','h\177\"')](yl,Dh)
+        end)
+        for jc,Gi in db[wd('b\131{\144a','\18\226')](yl)do
+            local ac,ib,jb,yc,Tb
+            Tb,jb={[12008]=-15838,[20646]=21122,[-23376]=-24243,[19025]=-19060,[-27320]=-32168,[8091]=-24243,[-23875]=-15838,[25835]=11093,[-32479]=-5629},function(mk)
+                return Tb[mk- -3105]
+            end
+            ib=jb(-35584)
+            repeat
+                while true do
+                    if ib==563944877-563933784 then
+                        db[wd("6\4 \t\'",'Be')][wd('\245\57\20\232*\28','\135\\y')](Rh,ac)
+                        ib=jb(-26481)
+                    elseif ib==-7671417955903/1362838507 then
+                        yc,ac=db[wd('\135\203\145\198\150','\243\170')][wd('\189Q\181\\','\219\56')](Fj,Gi),db[wd('\190\212\168\217\175','\202\181')][wd('\224\55\232:','\134^')](Rh,Gi)
+                        if yc then
+                            ib=jb(-30425)
+                            break
+                        end
+                        ib=jb(8903)
+                    elseif ib==-1176962977- -1176984099 then
+                        ib=jb(4986);
+                    elseif ib==-12553936210344/390261633 then
+                        db[wd("1\151\'\154 ",'E\246')][wd('\252\135\158\225\148\150','\142\226\243')](Fj,yc)
+                        ib=jb(-26980)
+                    elseif ib==-1226021559+1225997316 then
+                        ib=jb(15920);
+                        break;
+                    elseif ib==1740976245+-1740992083 then
+                        if not(ac)then
+                            ib=jb(17541)
+                            break
+                        else
+                            ib=jb(22730)
+                            break
+                        end
+                        ib=2.3619250848629221e-05*-1026408507
+                    end
+                end
+            until ib==10406683912480/-545996008
+        end;
+        db[wd('T\213B\216E',' \180')][wd('\222\229\216\232\207','\189\137')](yl);
+        yl=nil;
+        local Kd,lg,rk=function(uj,Kk)
+            local _l,Cb,Cb,Vd,fk,Vd,Be,um,Ec,zb,Xf
+            fk,Be={[13215]=-23524,[24208]=18704,[-22893]=-30756,[-14750]=31731,[28995]=8912,[-1904]=18704,[-24147]=-23524,[1326]=-15205,[27029]=-7710,[1573]=31731,[-13829]=7064,[-3394]=3080,[-25052]=-6495,[-16659]=-27651,[-17995]=29122,[20207]=8912,[25295]=13713,[22184]=18704,[-14108]=-20124,[12231]=-30756,[1708]=7549,[31367]=8912,[26489]=-18982,[27926]=25055},function(jm)
+                return fk[jm-27650]
+            end
+            zb=Be(55576)
+            repeat
+                while true do
+                    if zb==38666332547583/-1398370133 then
+                        zb=Be(3503);
+                    elseif zb==-1.1922082035124199e-05*1592171564 then
+                        return false
+                    elseif zb==-179438903+179446452 then
+                        Cb,Vd=Ec(Xf,um);
+                        um=Cb;
+                        if um==nil then
+                            zb=Be(54139)
+                        else
+                            zb=5.272794305221573e-05*582897762
+                        end
+                    elseif zb==-8.411033330764939e-05*180774459 then
+                        zb=Be(39881);
+                    elseif zb==364873134132/-18131243 then
+                        _l=kl(Ec)
+                        if _l~=nil and _l['__iter']~=nil then
+                            zb=Be(2598)
+                            break
+                        elseif ek(Ec)==wd('4Z\"W%','@;')then
+                            zb=Be(13821)
+                            break
+                        end
+                        zb=Be(51858)
+                    elseif zb==-105844850+105863554 then
+                        zb=Be(12900)
+                    elseif zb==-3875654588224/-434880452 then
+                        Ec,Xf,um=db[wd('/\3p/\1b','Fs\17')](uj)
+                        if ek(Ec)~='function'then
+                            zb=Be(13542)
+                            break
+                        end
+                        zb=Be(29223)
+                    elseif zb==1.9727837154994133e-05*-1559015302 then
+                        zb=Be(29358)
+                    elseif zb==1948655112+-1948624377 then
+                        if not(db[wd(wd('\228\\\134n\231H\144g','\179\202]\176'),wd('\165\198,\138','\128\49'))](Vd,Kk))then
+                            zb=Be(10991)
+                            break
+                        else
+                            zb=Be(52945)
+                            break
+                        end
+                        zb=-852642918+852619394
+                    elseif zb==186378646-186386356 then
+                        return false
+                    elseif zb==-1685750474- -1685757538 then
+                        Ec,Xf,um=wm(Ec)
+                        zb=Be(25746)
+                    elseif zb==1201789991+-1201786911 then
+                        return true
+                    elseif zb==17304022547456/-735590144 then
+                        if not(db[wd(wd('3kz\"}l','\157&c'),wd('R\188\225','\136'))](Vd)==wd(wd('\181\243\195\3\157\243\211\18','\143\147\96\217'),wd('r\252\209\\','\1\242'))and nk(Vd,Kk))then
+                            zb=Be(28976)
+                            break
+                        else
+                            zb=Be(24256)
+                            break
+                        end
+                        zb=0.0002374133211922876*-129546227
+                    elseif zb==1624348498+-1624323443 then
+                        if not(db[wd(wd('{\213\127\201','l\250'),wd('\226\215','\129'))](uj)~=wd(wd('\96\249v\244q','G\r'),wd('T\146','\a')))then
+                            zb=Be(9655)
+                            break
+                        else
+                            zb=Be(54679)
+                            break
+                        end
+                        zb=Be(56645)
+                    elseif zb==-245525596- -245554718 then
+                        zb=Be(47857);
+                    elseif zb==-1843153378- -1843167091 then
+                        return true
+                    elseif zb==-156861326+156854831 then
+                        Ec,Xf,um=_l['__iter'](Ec)
+                        zb=Be(49834)
+                    elseif zb==-1621433626- -1621465357 then
+                        zb=-719988665+719996214;
+                    end
+                end
+            until zb==1036518251+-1036503376
+        end,function(Uj)
+            local Cd,mc,al,bb,Sc
+            bb,Sc={[4144]=29071,[-16759]=29071,[24816]=-11640,[28067]=26955},function(hg)
+                return bb[hg- -12459]
+            end
+            Cd=Sc(15608)
+            repeat
+                while true do
+                    if Cd==-7.6223321943731116e-06*1527091670 then
+                        return Uj
+                    elseif Cd==-561761503+561790574 then
+                        if al>-1538342140+1538342140 then
+                            Cd=414320009-414344380
+                        else
+                            Cd=Sc(12357)
+                        end
+                    elseif Cd==-14166957590610/581303910 then
+                        mc=db[wd('+\129\50\136','F\224')][wd('\161*\133\183$\134','\211K\235')](al)
+                        Uj[al],Uj[mc]=Uj[mc],Uj[al]
+                        al-=1150809219-1150809218
+                        Cd=Sc(-29218)
+                    elseif Cd==-755768566+755795521 then
+                        al=#Uj
+                        Cd=Sc(-8315)
+                    end
+                end
+            until Cd==-8.1666793408851758e-06*1986486713
+        end,function(bc)
+            local fl,_,Al,Nf,Ek,Nf,Hj,Fb,Hh,wc,_
+            Hj,Hh={[20442]=29121,[22823]=29121,[966]=14748,[20059]=-32228,[23579]=-6598,[-20961]=19700,[23884]=-32228,[12484]=11149,[-32581]=-13653,[-4261]=25833,[-14128]=1631,[11878]=22686,[28962]=1631,[11793]=23669,[31561]=17662},function(rg)
+                return Hj[rg+13813]
+            end
+            Fb=Hh(17748)
+            repeat
+                while true do
+                    if Fb==-1929314573+1929337259 then
+                        if not(db[wd(wd('Z\14^\18','\189q'),wd('U\192','\198'))](_)~=wd(wd('\254l\203\228v\222','\135\239\173'),wd('J\183T','@'))and db[wd(wd(' \226=1\244+','\96)p'),wd('p\246y','D'))](_)~=wd(wd('r\162}\200Z\162m\217','\230K\140\200'),wd('\n\203U8','\215L')))then
+                            Fb=Hh(-2020)
+                            break
+                        else
+                            Fb=Hh(-46394)
+                            break
+                        end
+                        Fb=599799833+-599832061
+                    elseif Fb==1659190989+-1659189358 then
+                        Fb=Hh(9010)
+                    elseif Fb==24751750654820/-768020065 then
+                        Fb=Hh(9766)
+                    elseif Fb==-3.7642483654768446e-05*-773620579 then
+                        Fb=1296806918688/-196545456;
+                    elseif Fb==-4516299965892/-255707166 then
+                        wc,Ek,Al=db[wd('{\248\193{\250\211','\18\136\160')](bc)
+                        if ek(wc)~='function'then
+                            Fb=Hh(-1329)
+                            break
+                        end
+                        Fb=Hh(6629)
+                    elseif Fb==5.4018029939927507e-05*478229214 then
+                        wc,Ek,Al=wm(wc)
+                        Fb=Hh(-27941)
+                    elseif Fb==1806576582-1806552913 then
+                        Fb=Hh(6246);
+                    elseif Fb==5989569421790/-907785605 then
+                        Nf,_=wc(Ek,Al);
+                        Al=Nf;
+                        if Al==nil then
+                            Fb=Hh(-34774)
+                        else
+                            Fb=Hh(-1935)
+                        end
+                    elseif Fb==604221046-604209897 then
+                        fl=kl(wc)
+                        if fl~=nil and fl['__iter']~=nil then
+                            Fb=Hh(-12847)
+                            break
+                        elseif ek(wc)==wd('\"\6\52\v3','Vg')then
+                            Fb=Hh(-18074)
+                            break
+                        end
+                        Fb=1214099580-1214097949
+                    elseif Fb==1.6201781777333777e-05*-842685094 then
+                        return false
+                    elseif Fb==6424160708484/435595383 then
+                        wc,Ek,Al=fl['__iter'](wc)
+                        Fb=Hh(15149)
+                    elseif Fb==1.0006782551497139e-05*1968664743 then
+                        return true
+                    end
+                end
+            until Fb==7.757248945549815e-06*1151825868
+        end
+        local Ag;
+        Ag=mj(db[wd('\\\193V\197',';\160')],wd('}\"\a\190\134G\30\b\179\135','\"}i\223\235'),function(...)
+            local pi,ig,nh,fa,Z,pi,pj,Ul,Jf,Wh,pa,self,dl,Rd,Vk,Yf,qb,jl,_i,bf,Vk,sa,jh,D,yg,Kl,bf,Md,xh,dl,_i,Ul,Gg
+            D,xh={[20811]=26255,[7730]=-24022,[17532]=24793,[-18584]=-26422,[26024]=13450,[-9954]=-18091,[-10231]=7717,[22505]=-18580,[-9213]=5583,[-23549]=-17191,[20415]=24793,[23123]=-25512,[1940]=-14797,[-25739]=26255,[-8384]=24793,[23634]=32467,[-30072]=12819,[-9262]=-19239,[-15351]=-8844,[-24022]=-7283,[-26905]=-13588,[-544]=-13588,[-896]=20576,[26519]=-24022,[-23219]=24836,[27674]=18687,[-6793]=18943,[-261]=-11292,[-23777]=-13588,[-14813]=-9081,[3771]=-30117,[-17966]=-26187,[2231]=4210,[-2469]=4210,[-20354]=13989,[27761]=-14930,[-19827]=18943,[22297]=19763,[5858]=12819,[-9454]=-25017,[-20983]=13450,[4552]=-29799,[7243]=26255,[8093]=18687,[-7646]=4210,[29866]=-8844,[16823]=-8844,[26136]=-14042,[-29154]=-19239,[31029]=1065,[8429]=26206,[22041]=17373,[-24737]=-29656,[-8983]=30859,[-2986]=19022,[2490]=-31633,[-6047]=-10766,[5081]=-3117,[19240]=1065,[28157]=-24022,[24112]=-8844,[-24980]=10838,[1831]=-18580,[8860]=-15217},function(s)
+                return D[s+-31548]
+            end
+            Z=xh(40408)
+            repeat
+                while true do
+                    if Z==-177648798- -177662248 then
+                        Z=xh(33379)
+                    elseif Z==13370696161401/1043037379 then
+                        Z=xh(24755)
+                    elseif Z==-9.4239387487328292e-06*1142409802 then
+                        db[wd('._8R?','Z>')][wd('\249\225\a\245\253\0','\144\143t')](Jf,bf)
+                        Z=xh(16197)
+                    elseif Z==461748226+-461766806 then
+                        Z=8584608104067/1537633549;
+                    elseif Z==-1014203981+1014228817 then
+                        sa,Wh,Yf=db[wd('\187\223\162\204\184','\203\190')](lg(Rh))
+                        if ek(sa)~='function'then
+                            Z=xh(22565)
+                            break
+                        end
+                        Z=730987502-731005593
+                    elseif Z==899945542-899952825 then
+                        ig,nh,yg=jh['__iter'](ig)
+                        Z=xh(57572)
+                    elseif Z==1.4048280816964664e-05*-1880799533 then
+                        Z=xh(51963);
+                    elseif Z==-2508801037246/-95733841 then
+                        Md=kl(pa)
+                        if Md~=nil and Md['__iter']~=nil then
+                            Z=xh(53589)
+                            break
+                        elseif ek(pa)==wd('\4\142\18\131\21','p\239')then
+                            Z=xh(7999)
+                            break
+                        end
+                        Z=xh(58067)
+                    elseif Z==-8.8551597556287129e-06*1005063742 then
+                        return Ag(self,Jf,qb)
+                    elseif Z==8.3601221711881237e-05*369121400 then
+                        Rd=kl(sa)
+                        if Rd~=nil and Rd['__iter']~=nil then
+                            Z=xh(22094)
+                            break
+                        elseif ek(sa)==wd('\235\144\253\157\250','\159\241')then
+                            Z=xh(6568)
+                            break
+                        end
+                        Z=xh(4643)
+                    elseif Z==-1.9062557839784539e-05*949033186 then
+                        Z=-19481357706426/743932398;
+                    elseif Z==-488102420+488087490 then
+                        Z=xh(11721);
+                    elseif Z==3634337944702/191856514 then
+                        return Ag(...)
+                    elseif Z==-470672324- -470670888 then
+                        Z=xh(61414)
+                    elseif Z==30638276744800/943674400 then
+                        if nk(bf,db[wd('\212\133\222\129','\179\228')])then
+                            Z=xh(16735)
+                            break
+                        elseif nk(bf,ta)then
+                            Z=xh(8329)
+                            break
+                        else
+                            Z=xh(25501)
+                            break
+                        end
+                        Z=xh(55660)
+                    elseif Z==-2989485193952/173898272 then
+                        pa,pj,Kl=wm(pa)
+                        Z=xh(59705)
+                    elseif Z==-1351441218+1351460240 then
+                        if db[wd('\v\136\180\26\158\162','\127\241\196')](bf)==wd('D&\139\140l&\155\157','\rH\248\248')then
+                            Z=xh(55182)
+                            break
+                        elseif not(db[wd(wd('{ZsjLe','-\6y'),wd('BE\26','\96'))](bf)==wd(wd('|4:f./','\146Dh'),wd('\228}Y','y')))then
+                            Z=xh(36629)
+                            break
+                        else
+                            Z=xh(21317)
+                            break
+                        end
+                        Z=-194945193+194949403
+                    elseif Z==1.1247183828454514e-05*-1352960904 then
+                        self,jl,qb=...
+                        Gg=db[wd('\n\136\171\16\146\190','y\252\217')][wd('\152\191\138\174','\255\204')](la(),wd('\243\136\216','\173'),db[wd('T\137\155N\147\142',"\'\253\233")][wd('\220a\199k\194','\176\14')])
+                        if not(not Yd()and db[wd(wd('\15\238\227\30\248\245','\25\163\141'),wd('.xR','L'))](self)==wd(wd('hH\247\50@H\231#','\137\145Q\t'),wd('\193&\188\222','i\145'))and nk(self,gk))then
+                            Z=xh(59309)
+                            break
+                        else
+                            Z=xh(57684)
+                            break
+                        end
+                        Z=-1.2775025690291395e-05*-1482815022
+                    elseif Z==1596321035667/-63809451 then
+                        sa,Wh,Yf=Rd['__iter'](sa)
+                        Z=xh(31004)
+                    elseif Z==1430353451-1430333688 then
+                        fa=db[wd('h\23\163r\r\182','\27c\209')][wd('~\189a\164y','\r\205')](jl,wd('\127','\127'))[-57148267- -57148268]
+                        if not(db[wd(wd('e\246\199W|\251\204P','\206\219\4\48'),wd('\233\148\155\196','6\214'))](fa))then
+                            Z=xh(12964)
+                            break
+                        else
+                            Z=xh(33488)
+                            break
+                        end
+                        Z=xh(23164)
+                    elseif Z==11248810176897/2014832559 then
+                        dl,bf=ig(nh,yg);
+                        yg=dl;
+                        if yg==nil then
+                            Z=1106266503-1106275403
+                        else
+                            Z=xh(28562)
+                        end
+                    elseif Z==-5675092498432/404151296 then
+                        if not(Gg==wd(wd('\212\182+\190\139\213\192\133=\171\138\215','B\19\209\53\232\5'),wd('\175\201\15\174\18!','I\30\144'))and db[wd(wd('\24\5\28\25','\184\211'),wd('\216\163','\f'))](jl)==wd(wd('\232\48\254=\249','\230\144'),wd(':\129','@'))and(Kd(jl,db[wd(wd('\142:\132>','o\181'),wd('\182\222','0'))])or Kd(jl,ta))and rk(jl))then
+                            Z=xh(34038)
+                            break
+                        else
+                            Z=xh(31287)
+                            break
+                        end
+                        Z=-22198467335829/-1731684791
+                    elseif Z==-1.7622926513436165e-05*839644879 then
+                        fa=wd('\204\185\5\241\155\49\219\175\20\244\210m\145','\190\219}\144\232B')..fa
+                        Z=xh(49080)
+                    elseif Z==1752695919+-1752691709 then
+                        Z=xh(22335)
+                    elseif Z==1212551623-1212532936 then
+                        Z=xh(22286);
+                    elseif Z==1909639386+-1909622013 then
+                        pa,pj,Kl=Md['__iter'](pa)
+                        Z=xh(39278)
+                    elseif Z==-1054489429- -1054514222 then
+                        if db[wd('\179\48\165=\162','\199Q')][wd('\148S\156^','\242:')](Ik,fa)then
+                            Z=xh(36100)
+                            break
+                        end
+                        Z=xh(50788)
+                    elseif Z==-5.9580334312164544e-06*1524160632 then
+                        pa,pj,Kl=db[wd('\212\226\205\241\215','\164\131')](lg(Fj))
+                        if ek(pa)~='function'then
+                            Z=xh(39977)
+                            break
+                        end
+                        Z=xh(59222)
+                    elseif Z==1820503638+-1820529825 then
+                        Ul,pi=sa(Wh,Yf);
+                        Yf=Ul;
+                        if Yf==nil then
+                            Z=xh(30652)
+                        else
+                            Z=-1714998969- -1715008661
+                        end
+                    elseif Z==-14450010485309/456801773 then
+                        if not(Gg==wd(wd('\150{a\160\21a}\169\230\148jv\137\53fy\169\213\130','\217\140\185U|\146\241\1\166'),wd('}\167\236\143O\181\169\231S','U5@;'))and db[wd(wd('\vx\15d','bv'),wd('\156\246','\129'))](jl)==wd(wd('%\128\142?\154\155','\142Y\255'),wd('\140\249W','T')))then
+                            Z=xh(54671)
+                            break
+                        else
+                            Z=xh(53845)
+                            break
+                        end
+                        Z=xh(5809)
+                    elseif Z==352099402+-352123424 then
+                        Z=xh(39641)
+                    elseif Z==-16119638534336/-2088847808 then
+                        db[wd('\248u\238x\233','\140\20')][wd('\b \227\4<\228','aN\144')](Jf,bf)
+                        Z=xh(29079)
+                    elseif Z==440335276+-440365393 then
+                        jh=kl(ig)
+                        if jh~=nil and jh['__iter']~=nil then
+                            Z=xh(7526)
+                            break
+                        elseif ek(ig)==wd('\251\167\237\170\234','\143\198')then
+                            Z=xh(11194)
+                            break
+                        end
+                        Z=802712568-802699118
+                    elseif Z==-1516669147- -1516660303 then
+                        Z=xh(23902)
+                    elseif Z==-1.6681949417330397e-05*676899307 then
+                        Jf={}
+                        ig,nh,yg=db[wd('\29\198\168\29\196\186','t\182\201')](jl)
+                        if ek(ig)~='function'then
+                            Z=xh(35319)
+                            break
+                        end
+                        Z=xh(54053)
+                    elseif Z==-6344015715045/2035295385 then
+                        Z=xh(33779);
+                    elseif Z==-1662148613- -1662169189 then
+                        Z=xh(48371)
+                    elseif Z==-17899696151600/-1651568200 then
+                        sa,Wh,Yf=wm(sa)
+                        Z=xh(7771)
+                    elseif Z==-8.3750269457764396e-06*-1157250008 then
+                        db[wd('|7j:m','\bV')][wd('\233\154v\229\134q','\128\244\5')](Jf,pi)
+                        Z=xh(13582)
+                    elseif Z==-1.7801679228080476e-05*1080740741 then
+                        _i,Vk=pa(pj,Kl);
+                        Kl=_i;
+                        if Kl==nil then
+                            Z=3.6190515746100243e-06*-396789040
+                        else
+                            Z=xh(6811)
+                        end
+                    elseif Z==-1.819008623245452e-05*747000307 then
+                        Z=xh(21594)
+                    elseif Z==679051329+-679025074 then
+                        Z=xh(37406)
+                    elseif Z==12414963+-12413898 then
+                        Z=xh(38791)
+                    elseif Z==46653885503352/-1828703571 then
+                        Z=xh(52359);
+                    elseif Z==-2123956029+2123970018 then
+                        ig,nh,yg=wm(ig)
+                        Z=xh(10565)
+                    elseif Z==870953711-870983510 then
+                        return rl[fa]or db[wd('M\132}\135','\b\234')][wd('z\235\211\25\194\218N\191X\240\243\b\215\232^\184',';\152\160|\182\156+\203')][wd('w\213W\223','9\186')]
+                    elseif Z==3.0331123306258211e-05*-977741566 then
+                        db[wd('\232\251\254\246\249','\156\154')][wd('\228m\168\232q\175','\141\3\219')](Jf,Vk)
+                        Z=xh(2394)
+                    end
+                end
+            until Z==-21970783777705/1451845885
+        end)
+        local ok;
+        ok=Li(gk[wd('\16k\200\t\5J$X\222\28\4H','@\25\173ej+')],function(...)
+            local S,Ij,zg,Aa,qk,Wg,og,Ci,Wg,Ni,mm,bm,mm,S,Sj,He,Kf,Wb,mb,qk,af,ii,self,gl,og,Jg,Gd,Vi,Ci,dk,M
+            Kf,Jg={[-14972]=2271,[-26419]=20113,[-19041]=-30980,[2195]=828,[17751]=-1480,[17466]=5583,[-1915]=14795,[-22289]=5583,[2867]=-1480,[-28877]=14795,[-29063]=-20319,[-7037]=-11183,[-10700]=8247,[24007]=-11183,[-15274]=14795,[-12160]=-32536,[3254]=-23000,[-17090]=20349,[-26392]=13560,[6928]=-4514,[-16624]=-470,[-25649]=22593,[3621]=-32536,[19589]=-11183,[-23544]=6608,[14519]=17868,[-29814]=-26266,[28074]=-4202,[14891]=5583,[-4717]=2271,[-3906]=-1480,[17085]=-4686,[-22771]=-22022,[15870]=-470,[-14625]=10886,[15034]=-7372,[-7994]=8576,[-25724]=22783,[19406]=-17228,[25499]=-31469,[-27469]=8247,[-15263]=-470,[-25430]=27682,[7189]=4740,[-11292]=2271,[-9849]=4703},function(Sk)
+                return Kf[Sk+11514]
+            end
+            Aa=Jg(-21363)
+            repeat
+                while true do
+                    if Aa==-2649470764644/630526122 then
+                        Vi=kl(Wb)
+                        if Vi~=nil and Vi['__iter']~=nil then
+                            Aa=Jg(-8260)
+                            break
+                        elseif ek(Wb)==wd('\205\154\219\151\220','\185\251')then
+                            Aa=Jg(-40577)
+                            break
+                        end
+                        Aa=Jg(-33803)
+                    elseif Aa==2008846122+-2008861746 then
+                        Aa=Jg(-8647)
+                    elseif Aa==1580050346+-1580044763 then
+                        Aa=Jg(-22214)
+                    elseif Aa==733331799-733362779 then
+                        gl,dk,Ij=wm(gl)
+                        Aa=Jg(-40391)
+                    elseif Aa==1.1999106747502574e-05*-2014816645 then
+                        if db[wd('I^OXHY',"=\'?")](qk)==wd('\163<\30.\139<\14?','\234RmZ')then
+                            Aa=Jg(-4325)
+                            break
+                        elseif not(db[wd(wd('\202L\150\219Z\128','|\219b'),wd('\138\166\204','H'))](qk)==wd(wd('\232\200\134\242\210\147','\207>\145'),wd('[\141j','\15')))then
+                            Aa=Jg(3520)
+                            break
+                        else
+                            Aa=Jg(-36944)
+                            break
+                        end
+                        Aa=1045458451+-1045469634
+                    elseif Aa==-1932832924- -1932837664 then
+                        if nk(qk,db[wd('Y\aS\3','>f')])then
+                            Aa=Jg(3005)
+                            break
+                        elseif nk(qk,ta)then
+                            Aa=Jg(-37163)
+                            break
+                        else
+                            Aa=Jg(-19508)
+                            break
+                        end
+                        Aa=1472525159360/-994949432
+                    elseif Aa==1344904662-1344902391 then
+                        Aa=Jg(-9319)
+                    elseif Aa==1765894755570/-896848530 then
+                        Aa=Jg(-15420)
+                    elseif Aa==-25217737391448/-1239261752 then
+                        Ni=kl(zg)
+                        if Ni~=nil and Ni['__iter']~=nil then
+                            Aa=Jg(-41328)
+                            break
+                        elseif ek(zg)==wd('\141O\155B\156','\249.')then
+                            Aa=Jg(5571)
+                            break
+                        end
+                        Aa=Jg(-26486)
+                    elseif Aa==541003690-540997082 then
+                        gl,dk,Ij=ii['__iter'](gl)
+                        Aa=Jg(-26788)
+                    elseif Aa==-7501864153056/-909647648 then
+                        Aa=-1.7587825148697965e-05*1252116155;
+                    elseif Aa==6252499452075/-559107525 then
+                        Aa=Jg(-23674)
+                    elseif Aa==-82090169- -82057633 then
+                        og,qk=zg(mb,af);
+                        af=og;
+                        if af==nil then
+                            Aa=-1464912895- -1464934302
+                        else
+                            Aa=-549809221- -549785045
+                        end
+                    elseif Aa==-828036842- -828056955 then
+                        Aa=-7.4232004996243087e-05*232083183;
+                    elseif Aa==1.2258807082162173e-05*1843001513 then
+                        gl,dk,Ij=db[wd('\127\167f\180|','\15\198')](lg(Rh))
+                        if ek(gl)~='function'then
+                            Aa=Jg(13985)
+                            break
+                        end
+                        Aa=1.7909590878605919e-05*1123029562
+                    elseif Aa==28333843695827/-900373183 then
+                        ii=kl(gl)
+                        if ii~=nil and ii['__iter']~=nil then
+                            Aa=Jg(-35058)
+                            break
+                        elseif ek(gl)==wd('\217\30\207\19\200','\173\127')then
+                            Aa=Jg(-30555)
+                            break
+                        end
+                        Aa=Jg(-13429)
+                    elseif Aa==-251800115- -251778093 then
+                        mm,Ci=Wb(M,bm);
+                        bm=mm;
+                        if bm==nil then
+                            Aa=13472064763920/-862267330
+                        else
+                            Aa=Jg(-26139)
+                        end
+                    elseif Aa==1039727332-1039728812 then
+                        Aa=Jg(8075)
+                    elseif Aa==-709900028352/-857367184 then
+                        Aa=Jg(-7893);
+                    elseif Aa==-2014521652+2014517138 then
+                        Gd={}
+                        zg,mb,af=db[wd('\181\191\222\181\189\204','\220\207\191')](Sj)
+                        if ek(zg)~='function'then
+                            Aa=Jg(-28604)
+                            break
+                        end
+                        Aa=-1801421642+1801422470
+                    elseif Aa==-3.9769341897802087e-05*-215643498 then
+                        db[wd('\230\165\240\168\247','\146\196')][wd('^\207\26R\211\29','7\161i')](Gd,qk)
+                        Aa=Jg(6237)
+                    elseif Aa==-1331097752- -1331111312 then
+                        db[wd('\226\151\244\154\243','\150\246')][wd('\\\142\55P\146\48','5\224D')](Gd,Wg)
+                        Aa=Jg(7892)
+                    elseif Aa==8446963255740/-1145817045 then
+                        Aa=Jg(12493);
+                    elseif Aa==18088587979649/793951103 then
+                        Aa=Jg(4356);
+                    elseif Aa==1.8138037201169047e-05*-949827140 then
+                        S,Wg=gl(dk,Ij);
+                        Ij=S;
+                        if Ij==nil then
+                            Aa=368707718-368709687
+                        else
+                            Aa=Jg(-37906)
+                        end
+                    elseif Aa==9075136871985/1929648495 then
+                        self,Sj,He=...
+                        if not(not Yd()and db[wd(wd('5E!$S7','\176%\162'),wd('\152p\154','i'))](self)==wd(wd('Z\231\173\199r\231\189\214','\229\245\172R'),wd('\5\232\129u','\243\148'))and nk(self,gk)and db[wd(wd('\234\172\238\176',"\232\'"),wd('5\177','C'))](Sj)==wd(wd('RyDtC','\171\243'),wd('\21s','\152'))and(Kd(Sj,db[wd(wd('\228l\238h','f\191'),wd('i>','\140'))])or Kd(Sj,ta))and rk(Sj))then
+                            Aa=Jg(-37238)
+                            break
+                        else
+                            Aa=Jg(-4586)
+                            break
+                        end
+                        Aa=Jg(-28138)
+                    elseif Aa==1.239836664800403e-05*1441157574 then
+                        Wb,M,bm=db[wd('\226{\251h\225','\146\26')](lg(Fj))
+                        if ek(Wb)~='function'then
+                            Aa=Jg(16560)
+                            break
+                        end
+                        Aa=Jg(-38983)
+                    elseif Aa==-737466786+737446467 then
+                        Wb,M,bm=wm(Wb)
+                        Aa=Jg(3377)
+                    elseif Aa==-2.1946402129176163e-05*-1261345702 then
+                        db[wd('q\147g\158\96','\5\242')][wd('1\189\167=\161\160','X\211\212')](Gd,qk)
+                        Aa=Jg(-18551)
+                    elseif Aa==776460077-776464763 then
+                        zg,mb,af=wm(zg)
+                        Aa=Jg(-22806)
+                    elseif Aa==-608928572290/1295592707 then
+                        return ok(...)
+                    elseif Aa==-360775823- -360749557 then
+                        zg,mb,af=Ni['__iter'](zg)
+                        Aa=Jg(-16231)
+                    elseif Aa==-1877837781- -1877859188 then
+                        return ok(self,Gd,He)
+                    elseif Aa==1732894115020/159185570 then
+                        db[wd('\165\29\179\16\180','\209|')][wd('\195\204\241\207\208\246','\170\162\130')](Gd,Ci)
+                        Aa=Jg(-34285)
+                    elseif Aa==-39851739981000/1732684347 then
+                        Wb,M,bm=Vi['__iter'](Wb)
+                        Aa=Jg(5952)
+                    elseif Aa==3127163653955/211366249 then
+                        Aa=Jg(-37933)
+                    end
+                end
+            until Aa==-1183888832373/-154494171
+        end)
+        local f;
+        f=Li(gk[wd('\208\240\191g\20)\170#.\242\225\168N4.\174#\29\228','\151\149\203&gZ\207Wh')],function(...)
+            local vh,Lc,wb,O,self
+            O,vh={[-31189]=13957,[6363]=25777,[-22193]=19050,[12011]=3802,[-13585]=25777,[-11767]=-1170,[25206]=9825,[-25969]=-28676},function(eb)
+                return O[eb+-11328]
+            end
+            Lc=vh(-14641)
+            repeat
+                while true do
+                    if Lc==-30307163979150/-1590927243 then
+                        return db[wd('\232\16\216\19','\173~')][wd('F\254\187\53\245\175\131bd\229\155$\224\157\147e','\a\141\200P\129\233\230\22')][wd('\139\148\171\158','\197\251')]
+                    elseif Lc==7745618937674/2037248537 then
+                        wb=db[wd('\232\181\136\242\175\157','\155\193\250')][wd('f4y-a','\21D')](wb,wd('\175','\175'))[251299923+-251299922]
+                        if db[wd('2\255\199\239+\242\204\232','F\144\169\154')](wb)then
+                            Lc=vh(-439)
+                            break
+                        end
+                        Lc=vh(17691)
+                    elseif Lc==-1540120783+1540119613 then
+                        wb=wd('\175_\142F\1\195\184I\159CH\159\242',"\221=\246\'r\176")..wb
+                        Lc=vh(-2257)
+                    elseif Lc==-727449721- -727459546 then
+                        Lc=vh(-19861)
+                    elseif Lc==2.2979858364979753e-05*1121721448 then
+                        if db[wd('\174\1\184\f\191','\218\96')][wd('IDAI','/-')](Ik,wb)then
+                            Lc=vh(-10865)
+                            break
+                        end
+                        Lc=-2041670711+2041680536
+                    elseif Lc==-2049874883- -2049846207 then
+                        self,wb=...
+                        if not Yd()and db[wd('\139\137W\154\159A',"\255\240\'")](self)==wd('\224\5\148\251\200\5\132\234','\169k\231\143')and nk(self,gk)and db[wd('\153\17\157\r','\237h')](wb)==wd('w9 m#5','\4MR')then
+                            Lc=vh(23339)
+                            break
+                        end
+                        Lc=815075791-815061834
+                    elseif Lc==-1847347493+1847361450 then
+                        return f(...)
+                    end
+                end
+            until Lc==-22859663251625/1041584875
+        end)
+    end);
+    db[wd('p\231w\237','\4\134')][wd('\226\29\240\26\255','\145m')](function()
+        if not(rf[wd('\173s&N\237\25\135x\22U\249\25\144','\228\29U:\140w')]or rf[wd('\250+9\54t\208\206|\204\3g\30s\205\218e\219','\175b\vr0\162\175\v')]or rf[wd('\255\230\183\30\133\144\207\212\196\200\233?\146\141\211\219\222','\170\175\133Z\209\226\166\181')])then
+            return
+        end
+        local Dk;
+        Dk=mj(db[wd('\183b\189f','\208\3')],wd('>\148\226\15\175\238\25','a\203\139'),function(...)
+            local ve,Kc,El,ni,self,cc
+            cc,ve={[22422]=-3307,[31792]=-18821,[22932]=-9736,[-17602]=32109,[6053]=-11636,[5646]=-21823,[27495]=-9736,[-12823]=1419,[-20960]=-18277,[-3109]=21991,[31646]=32109,[-4310]=-7184,[-11908]=1419,[-31555]=-7184,[27055]=1419,[-31062]=-19068,[-32713]=-13060,[-7997]=-9736,[-26069]=-31585,[-11741]=14013,[22464]=6576},function(hd)
+                return cc[hd+20193]
+            end
+            Kc=ve(2271)
+            repeat
+                while true do
+                    if Kc==-8.1348257307803666e-05*-80837626 then
+                        self,El=...
+                        if not(not Yd()and db[wd(wd('\175k\176\190}\166','D$\252'),wd('X\241\251','\199'))](self)==wd(wd(' \240#\199\b\240\51\214','\242e\226\237'),wd('\162\53\139\144','9\206'))and nk(self,Ve)and db[wd(wd('\155\180\159\168','F\176'),wd('\220\b','u'))](El)==wd(wd('9\51\51#)&','\189\15\141'),wd('\242M\201','\5'))and#El<1.5322261013227569*903392415+(-3365119553- -1980918371))then
+                            Kc=ve(-51255)
+                            break
+                        else
+                            Kc=ve(-46262)
+                            break
+                        end
+                        Kc=ve(6862)
+                    elseif Kc==-948979269018/-668766222 then
+                        return Dk(...)
+                    elseif Kc==-408719022+408741013 then
+                        Kc=ve(11453);
+                    elseif Kc==4577390170560/326653120 then
+                        Kc=ve(2739);
+                    elseif Kc==-355186963+355173903 then
+                        Kc=ve(-51748);
+                    elseif Kc==-936140773- -936121705 then
+                        Kc=ve(-32101);
+                    elseif Kc==-8885674838140/407170180 then
+                        return gh
+                    elseif Kc==-1247473970+1247506079 then
+                        return ni
+                    elseif Kc==1036757780+-1036776057 then
+                        if not(rf[wd(wd('h#\222 \f\148B(\238;\24\148U',"b\166\5\'\170?"),wd('XL\ah\96j','\27\167\175'))]and El==wd(wd('\29\141{\203e\136\55\134K\208q\136 ','\"e\159\159\52\142'),wd('\167\183\6\241\1\249','\209\49\145')))then
+                            Kc=ve(-52906)
+                            break
+                        else
+                            Kc=ve(-14140)
+                            break
+                        end
+                        Kc=-779601075+779593891
+                    elseif Kc==1834982708-1834986015 then
+                        return Ck
+                    elseif Kc==-2123416673- -2123385088 then
+                        El=db[wd('\242F\163\232\\\182','\129\50\209')][wd('\249P\235A','\158#')](El,wd('\25b+','G'),db[wd('N\222\230T\196\243','=\170\148')][wd("\"\195\'\214%",'W\179')])
+                        ni=Dk(...)
+                        if not(db[wd(wd('\132\208r\149\198d','y\149q'),wd('-\152\215','\164'))](ni)==wd(wd('\18\206\53\30\222*',"\'\26\31"),wd('\174T\178','\245')))then
+                            Kc=ve(-23302)
+                            break
+                        else
+                            Kc=ve(-41153)
+                            break
+                        end
+                        Kc=-42720444450915/-1330481935
+                    elseif Kc==5.7971690902795889e-05*-200718658 then
+                        return se
+                    elseif Kc==-7.4692540617435009e-06*961809565 then
+                        if not(rf[wd(wd('\128\18\238\198\55[\185-\182:\176\238\48F\173\52\161','\96\166k\204W\175\235t'),wd(':\145F\146\171\234\194\242','\143l\241\220'))]and El==wd(wd('\166\20\23:\233\48\179\26\144<I\18\238-\167\3\135','\180\196\144\135\26\212\228~'),wd('}\210\177\190\141\221\50T',':K\4G')))then
+                            Kc=ve(-31934)
+                            break
+                        else
+                            Kc=ve(2229)
+                            break
+                        end
+                        Kc=ve(7302)
+                    elseif Kc==-1.2480721956310468e-05*1508005712 then
+                        Kc=ve(-37795)
+                    elseif Kc==-1559215713- -1559205977 then
+                        if rf[wd('M\213\188e\21\213\20\164v\251\226D\2\200\b\171l','\24\156\142!A\167}\197')]and El==wd('\16\159{d\b\183xY+\177%E\31\170dV1','E\214I \\\197\17\56')then
+                            Kc=ve(-14547)
+                            break
+                        end
+                        Kc=37364937244723/-1985279063
+                    end
+                end
+            until Kc==431736787+-431733281
+        end)
+    end);
+    db[wd('%5\"?','QT')][wd('\237\170\255\173\240','\158\218')](function()
+        if not rf[wd('\205:\161\155j\1\245\250\239;\129\184}\22\194\230\242','\138_\213\221\5b\128\137')]then
+            return
+        end
+        local Lf;
+        Lf=mj(db[wd('I\29C\25','.|')],wd('?\131\202\229\171\5\191\197\232\170','\96\220\164\132\198'),function(...)
+            local ei,_a,we,Sd,_d,Xa,self,Bf
+            we,_a={[12874]=-4451,[-2405]=-17483,[-20875]=-2461,[147]=-12314,[27863]=23961,[4045]=23961,[7512]=8565,[6046]=-605,[23561]=20709,[-26998]=22056,[-18470]=-4451,[16543]=3691},function(Re)
+                return we[Re- -12955]
+            end
+            _d=_a(3588)
+            repeat
+                while true do
+                    if _d==1.7888724452868926e-05*1157656604 then
+                        return nil
+                    elseif _d==-2.6892366169574262e-06*915129589 then
+                        _d=_a(-81);
+                    elseif _d==1568029336+-1568007280 then
+                        return Lf(...)
+                    elseif _d==14910311454186/-1210842249 then
+                        if not(db[wd(wd('\15\156\n\30\138\28',')(\158'),wd('\233v_','\187'))](self)==wd(wd('\238\15\169\180\198\15\185\165','\96AJ\197'),wd('w\229 \192','\176\197'))and nk(self,ab)and Sd==wd(wd('\134\213\238Y\254X\170\184\132\212\206z\233O\157\164\153','\223\212\169t\230A\186\255'),wd('\180<U1\253\"\3n','\138XfZ')))then
+                            _d=_a(-33830)
+                            break
+                        else
+                            _d=_a(-6909)
+                            break
+                        end
+                        _d=-805661940+805657489
+                    elseif _d==425078780+-425083231 then
+                        _d=_a(-39953)
+                    elseif _d==-2.0280079381618746e-05*-1181504251 then
+                        return ei
+                    elseif _d==739136213-739153696 then
+                        Bf,Xa=db[wd('!U0Z=','Q6')](y,ei,wg)
+                        if Xa and(db[wd('/\183+\171','[\206')](Xa)==wd('\222H\167\208B\169\210',"\188\'\200")and Xa==true)or(db[wd('\145\181\149\169','\229\204')](Xa)==wd('2\240Y(\234L','A\132+')and Xa['lower'](Xa)['match'](Xa['lower'](Xa),wd('\128\253\196\189\240\129\231\211\248\253\128','\244\149\161\157\147')))then
+                            _d=_a(10606)
+                            break
+                        end
+                        _d=-1444621550+1444630115
+                    elseif _d==-277982910425/459475885 then
+                        ei=Lf(...)
+                        if db[wd('\227f\135\242p\145','\151\31\247')](ei)==wd('D\238.\22l\238>\a','\r\128]b')then
+                            _d=_a(-15360)
+                            break
+                        end
+                        _d=_a(-8910)
+                    elseif _d==1453845653+-1453837088 then
+                        _d=_a(14908)
+                    elseif _d==-7627680777538/-2066562118 then
+                        Sd=db[wd('\156\0\164\134\26\177','\239t\214')][wd('X\147J\130','?\224')](la(),wd('\162\217\137','\252'),db[wd('\178\153\197\168\131\208','\193\237\183')][wd('\197\5\222\15\219','\169j')])
+                        self=...
+                        if not Yd()then
+                            _d=_a(-12808)
+                            break
+                        end
+                        _d=-440408889+440430945
+                    end
+                end
+            until _d==1203414823-1203416723
+        end)
+        local yf;
+        yf=Li(ab[wd('\142)L\137\198\229\52m\172(l\170\209\242\3q\177','\201L8\207\169\134A\30')],function(...)
+            local J,Gk,Ll,t,_e,self,ea
+            J,t={[30040]=2243,[-31685]=19385,[365]=-22503,[5413]=2243,[-27165]=-50,[31737]=-8651,[-18902]=19385,[-26548]=-22503,[9984]=-24300,[27545]=-11572,[-7178]=-9548,[10611]=-8829,[-27514]=-22503,[31543]=5960,[-10813]=-21556},function(Lb)
+                return J[Lb+-18189]
+            end
+            Gk=t(7376)
+            repeat
+                while true do
+                    if Gk==-3.3127507935493846e-05*349316949 then
+                        Gk=t(18554);
+                    elseif Gk==15290810846226/-1731884794 then
+                        ea=yf(...)
+                        if not(db[wd(wd('\201*\174\216<\184','0_\149'),wd('{\250\189','\246'))](ea)==wd(wd('\179dZV\155dJG','\208\142\166f'),wd('\17\142\180N',';\n')))then
+                            Gk=t(11011)
+                            break
+                        else
+                            Gk=t(-8976)
+                            break
+                        end
+                        Gk=-3993832098094/-1780576058
+                    elseif Gk==-1598402344+1598380788 then
+                        self=...
+                        if not Yd()then
+                            Gk=t(28173)
+                            break
+                        end
+                        Gk=t(-713)
+                    elseif Gk==2.4354659760515165e-08*-2052995217 then
+                        Ll,_e=db[wd('2\r#\2.','Bn')](y,ea,wg)
+                        if not(_e and(db[wd(wd(',\156(\128','\a.'),wd('|\232','#'))](_e)==wd(wd('-\194\216#\200\214!','D\155\255'),wd('\174\147\237','\165'))and _e==true)or(db[wd(wd('\21+\17\55',':\187'),wd('\211a','\136'))](_e)==wd(wd('\22\182S\f\172F','\133 s'),wd('\251\249I','\27'))and _e['lower'](_e)['match'](_e['lower'](_e),wd(wd(']Ey-\157\\_nh\144]',"\'\146\236\207\233"),wd('\230\255\24\130\255','\232@')))))then
+                            Gk=t(45734)
+                            break
+                        else
+                            Gk=t(49732)
+                            break
+                        end
+                        Gk=t(-9325)
+                    elseif Gk==8.3660581195054742e-06*712402414 then
+                        return nil
+                    elseif Gk==-1964151732+1964129229 then
+                        Gk=t(23602)
+                    elseif Gk==-698274305+698276548 then
+                        return ea
+                    elseif Gk==-7.4789821538760039e-06*1156708202 then
+                        Gk=t(-13496)
+                    elseif Gk==7.5687154664178177e-06*-1261508646 then
+                        Gk=t(48229);
+                    elseif Gk==1.0330254665914378e-05*1876526826 then
+                        return yf(...)
+                    elseif Gk==-619789390- -619765090 then
+                        if db[wd('\201\161\214\216\183\192','\189\216\166')](self)==wd('\193t:\251\233t*\234','\136\26I\143')and nk(self,ab)then
+                            Gk=t(28800)
+                            break
+                        end
+                        Gk=1.8963637786810938e-05*-456188844
+                    end
+                end
+            until Gk==2.1397500319173348e-05*-1436429468
+        end)
+    end);
+    db[wd('\159{\152q','\235\26')][wd('P\vB\fM','#{')](function()
+        if not rf[wd('1\128Q[\179\28\144[\96\162','v\245\56\20\209')]then
+            return
+        end
+        local oa=true;
+        db[wd('R\162U\168','&\195')][wd('\0\170\18\173\29','s\218')](function()
+            local Fe,n,Qe
+            Qe,Fe={[9445]=-21659,[-9904]=-6558,[-10739]=25374,[-18662]=22626,[13024]=21303},function(bi)
+                return Qe[bi+17870]
+            end
+            n=Fe(-4846)
+            repeat
+                while true do
+                    if n==1272864473-1272843170 then
+                        n=-39070131830532/1803875148;
+                    elseif n==-321301989- -321327363 then
+                        n=Fe(-27774);
+                        break;
+                    elseif n==1141758495+-1141735869 then
+                        oa=true
+                        n=Fe(-8425)
+                    elseif n==-2.3603469412058676e-05*917619339 then
+                        if db[wd('\v\179\f\185','\127\210')][wd('\169\196\183\209','\222\165')](db[wd('\23\244\14\253','z\149')][wd('\25\231\"\15\233!','k\134L')]()*(1.8884244113911883e-09*1588625937))then
+                            n=Fe(-36532)
+                        else
+                            n=Fe(-28609)
+                        end
+                    end
+                end
+            until n==1444969787-1444976345
+        end)
+        local aj;
+        aj=mj(db[wd('B\135H\131','%\230')],wd('\231z\130ct\221F\141nu','\184%\236\2\25'),function(...)
+            local Ya,yi,jk,self,sh,eg,Lk
+            eg,jk={[22345]=12964,[-23860]=14934,[16421]=29048,[-27455]=-30121,[25512]=-19005,[-20291]=-19005,[-8065]=29048,[19083]=29048,[28631]=-17981,[29939]=19510},function(Ql)
+                return eg[Ql+20421]
+            end
+            Ya=jk(9518)
+            repeat
+                while true do
+                    if Ya==10938295960630/-608325230 then
+                        Ya=jk(-4000);
+                    elseif Ya==-78970934- -78985868 then
+                        return oa
+                    elseif Ya==-1074856069- -1074885117 then
+                        return aj(...)
+                    elseif Ya==-52032399851523/1727445963 then
+                        oa=false
+                        Ya=jk(-40712)
+                    elseif Ya==39343525355400/-2070167080 then
+                        Ya=jk(-28486)
+                    elseif Ya==1376247294-1376227784 then
+                        self,yi,Lk=...
+                        sh=db[wd('\189\220>\167\198+','\206\168L')][wd('\213Z\199K','\178)')](la(),wd('\254\133\213','\160'),db[wd('\0\"\184\26\56\173','sV\202')][wd('d\137\127\131z','\b\230')])
+                        if not(not Yd()and db[wd(wd('\249\a\29\232\17\v','\168L\19'),wd('\210\197\137','\247'))](self)==wd(wd('\5\142\142\190-\142\158\175','#\28vU'),wd('\228\239\0\140','\139\19'))and nk(self,tj)and db[wd(wd('\4\213\236\246\a\193\250\255','\234h\127\28'),wd('\198\30\190M','Z\194'))](yi,wd(wd('\164\29\246n\151\225ZP\140\29\214D\139\230KS\133','\167\25\236\242\223rM\221'),wd('V\198)>6Z!\3','\17\167E\225'))))then
+                            Ya=jk(8210)
+                            break
+                        else
+                            Ya=jk(1924)
+                            break
+                        end
+                        Ya=jk(-1338)
+                    elseif Ya==1487951910-1487938946 then
+                        if sh==wd('\n\152\21.\146\19\b','m\253a')then
+                            Ya=jk(-44281)
+                            break
+                        elseif sh==wd('\229dL\213nJ\243','\150\1\56')and db[wd('\215e\182}\212q\160t','\165\4\193\24')](Lk,false)then
+                            Ya=jk(-47876)
+                            break
+                        end
+                        Ya=642233183-642252188
+                    end
+                end
+            until Ya==9.5008858256464933e-06*-1439865740
+        end)
+        local Za;
+        Za=Li(tj[wd('\132Ro\128Xi\166','\195\55\27')],function(...)
+            local fc,jf,nf,Ld,self
+            Ld,jf={[24425]=-19022,[-32429]=-18910,[26041]=-19022,[9664]=18305,[14112]=-19022,[-18147]=15629},function(ul)
+                return Ld[ul+-13564]
+            end
+            fc=jf(-4583)
+            repeat
+                while true do
+                    if fc==-2.6253506499394937e-05*-595310954 then
+                        self,nf=...
+                        if not(not Yd()and db[wd(wd('\246|\129\231j\151','\22?H'),wd('0\158\29','\164'))](self)==wd(wd('v\4G\3^\4W\18','\208\143\204\27'),wd('G\162P+','\168G'))and nk(self,tj)and db[wd(wd('\237\205i\192\238\217\127\201','\230H\244x'),wd('x\20\235-','\1\240'))](nf,wd(wd('\150\220L\1\3\v\4/\190\220l+\31\f\21,\183','\132~\200\214\213\189\241H'),wd('\245\254\226<\26\225\150\160','\163\57\16\168'))))then
+                            fc=jf(23228)
+                            break
+                        else
+                            fc=jf(-18865)
+                            break
+                        end
+                        fc=jf(27676)
+                    elseif fc==9.7028856151946887e-06*-1948904764 then
+                        return oa
+                    elseif fc==1631204086+-1631223108 then
+                        return Za(...)
+                    elseif fc==-35076967782150/-1916250630 then
+                        fc=jf(37989);
+                    end
+                end
+            until fc==-1017780703- -1017801324
+        end)
+        local Ca;
+        Ca=Li(tj[wd('E\18gU\24as','\22w\19')],function(...)
+            local z,Oe,self,fe,mi,Nd
+            Nd,fe={[-16761]=-31014,[4635]=848,[22882]=-10151},function(Wl)
+                return Nd[Wl- -23784]
+            end
+            z=fe(-902)
+            repeat
+                while true do
+                    if z==7.271422158563695e-06*-1396013019 then
+                        self,mi,Oe=...
+                        if not Yd()and db[wd('?do.ry','K\29\31')](self)==wd('\29;#\220\53;3\205','TUP\168')and nk(self,tj)and db[wd('\218Ia\30\217]w\23','\168(\22{')](mi,wd('\241\249\22\198\t\140?d\217\249\54\236\21\139.g\208','\181\156\96\133f\226L\v'))and db[wd('Hc\238kKw\248b',':\2\153\14')](Oe,false)then
+                            z=fe(-19149)
+                            break
+                        end
+                        z=1.5051091240779364e-05*-2060581489
+                    elseif z==-981858914064/-1157852493 then
+                        oa=false
+                        z=fe(-40545)
+                    elseif z==-197078991+197047977 then
+                        return Ca(...)
+                    end
+                end
+            until z==1377171214-1377170243
+        end)
+    end);
+    db[wd('5\214\50\220','A\183')][wd('yxk\127d','\n\b')](function()
+        if not rf[wd('v\166R\194U\162Q\197D','!\195\51\169')]then
+            return
+        end
+        local xj,Ue,qd,hf=db[wd('z\151\145Nl\140\138O|','\25\248\227!')][wd('\209\202\199\200','\166\184')],db[wd('\188\236\170\225\173','\200\141')][wd('0\19\246-\0\254','Bv\155')],db[wd('\31\174D\n\3\18\178X\3\27','v\221\54ob')]or db[wd('\253\186\235\183\236','\137\219')][wd('*\b\147N,\1\144R','C{\245<')],function()
+            db[wd('\224\r\247\16\247','\133\127')]('',-0/-1191652405)
+        end
+        local ti,jd=db[wd('\139\2e\147\235\188\153\19p\156\226\173','\248g\17\254\142\200')]({},{[wd('\142\176\180\158','\209\239')]=hf,[wd('\252\155/cW\215\182\50bC','\163\196[\f$')]=hf,[wd('\152\153\237\179\163\246','\199\198\132')]=hf,[wd('\173\212\167\156\239\171\138','\242\139\206')]=hf,[wd('\137\181\238$o\191\132\228$\96','\214\234\128A\24')]=hf,[wd('zvq\251\16D]}\252\b@','%)\28\158d')]=wd('\17\f\182\210%\n\150\215\57D\221)\1\243\155;O\142\217.N\218!','Ed\211\242Ho\226\182M%\191')}),function(Yi)
+            local pb,vf,zc,zd,Qb
+            Qb,vf={[-5897]=1718,[11153]=21390,[6819]=21390,[23767]=-12356,[-1079]=21390,[14357]=-3553},function(Td)
+                return Qb[Td-30662]
+            end
+            zd=vf(45019)
+            repeat
+                while true do
+                    if zd==-5.2951550261478867e-06*670990742 then
+                        if not((db[wd(wd('G\5qV\19g','8P\184'),wd('\196\227v','\207'))](Yi)==wd(wd('\207\243o\218\221\239n\215','e\230\169\b'),wd('\237\152\137I','!\248'))and Vh(Yi)))then
+                            zd=vf(24765)
+                            break
+                        else
+                            zd=vf(54429)
+                            break
+                        end
+                        zd=vf(29583)
+                    elseif zd==1710716084-1710728440 then
+                        zc=db[wd('\241\f\247\28\242','\149i')][wd('\153\52\150\53','\240Z')](Yi,wd('U',';'))
+                        pb=(zc~='')
+                        return(pb and db[wd('\v\203\161\29\205\185','x\174\205')](179297863-179297861,db[wd('\4\136\21\135\24','t\235')](xj(Yi)))==wd('=\223\154\157}K\16\237\26\224\223\230\24\160\137\160\216\244W\135\214\21\25\203\134\145pXU\228_\170\135\164J\238\128\161\150\176\r\201\153\24X','x\167\234\248\30?u\137:\199\229\193\56\206\230\212\248\211y\160\246v')..zc)or true;
+                    elseif zd==-427682601- -427703991 then
+                        return(db[wd('\127o\222ny\200','\v\22\174')](Yi)==wd('\213C\195N\196','\161\"')or db[wd('\248\4\252\24','\140}')](Yi)==wd('5\138\160}$\152\177n','@\249\197\15'))
+                    elseif zd==3.9843620607523189e-06*431185714 then
+                        zd=vf(37481);
+                    end
+                end
+            until zd==22354449986694/932134517
+        end
+        local _f;
+        _f=Li(bh()[wd('\163D=P\239\154\177U(_\230\139','\208!I=\138\238')],function(...)
+            local si,Kh=...
+            if not(not Yd()and db[wd(wd('\207\128\187\222\150\173','\218nj'),wd('z\140\186','\27'))](si)==wd(wd('\163g\181j\178','X\155'),wd('\20\6','\155'))and db[wd(wd('\4\182\130\21\160\148','\203\205C'),wd('\130;\136','9'))](Kh)==wd(wd('\127\201i\196n','\25\243'),wd('\239\166','\253')))then
+            else
+                local V;
+                if not(db[wd(wd('\19\179\a\2\165\17','\218\138\246'),wd('T\169h','\233'))](db[wd(wd('8\161\54-\165\53','\217\254y'),wd('c\206\200','\240'))](Kh,wd(wd('#\231\216\19\220\208','8_\158'),wd('\240S\159','\180'))))==wd(wd('\165\227\2\191\249\23','\25\163\v'),wd('y\130\205','\182')))then
+                else
+                    local Dm,Df,Cj,fi
+                    Cj,Dm={[-20458]=-16133,[-7869]=16069,[-14467]=-16133,[32329]=-20370,[11330]=15212,[-5850]=-20370,[-18524]=-27385,[28036]=-20370,[-27979]=-12807,[-25657]=10588,[-7139]=-28215,[23449]=11977},function(Hc)
+                        return Cj[Hc-4589]
+                    end
+                    fi=Dm(28038)
+                    repeat
+                        while true do
+                            if fi==5817502124008/549442966 then
+                                V=wd('\164','\207')
+                                fi=Dm(-15869)
+                            elseif fi==-6066753009445/-377543905 then
+                                V=wd('}\96','\22')
+                                fi=Dm(-1261)
+                            elseif fi==-635151234+635163211 then
+                                Df=db[wd('}\233\185g\243\172','\14\157\203')][wd('w\187h\162p','\4\203')](db[wd('\151\127d\130{g','\229\30\19')](Kh,wd('#\244g\19\207o','|\171\n')),wd('\202','\202'))[2139438012+-2139438011]
+                                if db[wd('\222M4\196W!','\173\57F')][wd('r\227z\238','\20\138')](Df,wd('l','\26'))and db[wd('\27\19\2\1\t\23','hgp')][wd('\180\143\188\130','\210\230')](Df,wd('\181','\222'))then
+                                    fi=Dm(-3280)
+                                    break
+                                elseif not(db[wd(wd('\140\30q\150\4d','\138A\28'),wd(';eQ','N'))][wd(wd('\14h\6e','8\198'),wd('\243d','\163'))](Df,wd(wd('\170','!'),wd('\241','\f'))))then
+                                    fi=Dm(-23390)
+                                    break
+                                else
+                                    fi=Dm(-2550)
+                                    break
+                                end
+                                fi=0.00012519705629453369*-162703506
+                            elseif fi==-58525747- -58497532 then
+                                V=wd('\149','\227')
+                                fi=Dm(32625)
+                            elseif fi==-33953741+33937608 then
+                                fi=Dm(36918)
+                            elseif fi==14438491977708/-1127390644 then
+                                if not(db[wd(wd('@\215\\Z\205I','\219\167B'),wd('4\216\176','\220'))][wd(wd('\228\133\236\136','+Z'),wd('\230\249','O'))](Df,wd(wd('\252','O'),wd('\25','\193'))))then
+                                    fi=Dm(-13935)
+                                    break
+                                else
+                                    fi=Dm(-21068)
+                                    break
+                                end
+                                fi=18208321968161/-1128638317
+                            elseif fi==-31258863+31238493 then
+                                fi=Dm(15919);
+                                break;
+                            elseif fi==456237606+-456264991 then
+                                fi=Dm(-9878);
+                            end
+                        end
+                    until fi==-8.7717506078443458e-06*-1734203431
+                end
+                if V then
+                    local ia,Ka=_f(...),(-4.8629650016980013e-08*-616907586)/db[wd('\149\183\165\156\178\163','\242\212\204')]()
+                    if not(db[wd(wd('\193~\226\200{\228','\183\25C'),wd('\228\241=','\245'))]()>(47475.911008293937/-1478116982)*(7.7488010133007296e+17/-829617213))then
+                    else
+                        Ka=-1625208538+1625208538
+                    end;
+                    db[wd('m\223j\213','\25\190')][wd('\254\196\236\195\227','\141\180')](function()
+                        local zi,Ua,Bh,qa,gm,Uk,el,m,Xc,Wj,Nj,Ua,Pl,qa,vd,lk,el,Hi,bg,md,Wj,Zc,hl,Sl,_b,I,Zb,hl,Ih,Hi
+                        m,Nj={[28854]=-25470,[-21858]=28533,[-28969]=9366,[9784]=-32677,[30058]=-9533,[-12522]=31309,[-30098]=-19337,[-31247]=-31657,[31488]=10524,[-21484]=28533,[-20196]=-13256,[-19107]=-25402,[-9627]=10431,[-9787]=-24064,[5622]=-16042,[1986]=27725,[-4298]=11045,[8837]=-29701,[-5348]=9366,[-212]=-31657,[-19021]=-7461,[32225]=2486,[-16534]=-19912,[-4635]=9932,[5880]=4980,[-9099]=28533,[7689]=14100,[2104]=-29701,[27099]=-30686,[-29126]=4779,[-1874]=-26945,[-21513]=-27789,[-15937]=-3678,[-19614]=-25470,[-19004]=19935,[-11890]=-29701,[12104]=31309,[26603]=29291,[9092]=4980,[15632]=-23303,[7906]=-8634,[9486]=-19847,[-8800]=22224,[27586]=15191,[2301]=-26670,[-7341]=32490,[7130]=-8673,[2544]=-8673,[9385]=-19337,[8662]=-591,[-11849]=10524,[29526]=2960,[-7752]=4717,[9554]=-32677,[-26814]=10524,[-878]=10556,[-7470]=-31595,[-8009]=-24128,[-1923]=-32677,[2014]=-591,[-12636]=10556,[4914]=27725,[22376]=-591,[29610]=22429,[26158]=2960,[-25877]=1563,[-221]=12974,[15452]=-26670,[-8017]=22641,[-15807]=-32626,[6482]=5412,[15736]=-24128,[-29445]=-31595,[3174]=-8673,[14932]=-32677,[14014]=18018},function(Ol)
+                            return m[Ol- -7595]
+                        end
+                        Xc=Nj(6419)
+                        repeat
+                            while true do
+                                if Xc==2067619276+-2067648977 then
+                                    Hi,Ua=nil,nil
+                                    Xc=Nj(-29453)
+                                elseif Xc==15812649964449/1515928479 then
+                                    vd,Ih,_b=lk['__iter'](vd)
+                                    Xc=Nj(-5051)
+                                elseif Xc==-1633081534+1633072001 then
+                                    Xc=Nj(-5609);
+                                elseif Xc==-340734329- -340744261 then
+                                    I=qd(ia)
+                                    if I and db[wd('\201F\1=R\219G\26![\195','\186#uO7')]then
+                                        Xc=Nj(-11893)
+                                        break
+                                    end;
+                                    Xc=Nj(-20231);
+                                elseif Xc==-2466692626165/-522936745 then
+                                    Zb=qd(ia)
+                                    if Zb and db[wd('\173\232\4\130\129\191\233\31\158\136\167','\222\141p\240\228')]then
+                                        Xc=Nj(-23402)
+                                        break
+                                    end;
+                                    Xc=Nj(-15604);
+                                elseif Xc==-1334647799- -1334662990 then
+                                    db[wd('<\148\240\136\235.\149\235\148\226\54','O\241\132\250\142')](ia,false)
+                                    Xc=Nj(21931)
+                                elseif Xc==2.2353116274500828e-05*-1079402071 then
+                                    db[wd('|\158\245}\154\246','\14\255\130')](ia,Hi,nil)
+                                    if not(Zb and db[wd(wd('\249x\23\223r\235y\f\195{\243','{l\244\242\3'),wd('\181G\211iP','D6'))])then
+                                        Xc=Nj(-1113)
+                                        break
+                                    else
+                                        Xc=Nj(-26702)
+                                        break
+                                    end
+                                    Xc=Nj(-19485)
+                                elseif Xc==-1195923504+1195925990 then
+                                    vd,Ih,_b=db[wd('4\174-\189\55','D\207')](ia)
+                                    if ek(vd)~='function'then
+                                        Xc=Nj(-23532)
+                                        break
+                                    end
+                                    Xc=1136525638+-1136535171
+                                elseif Xc==-635735226- -635711162 then
+                                    Sl=qd(ia)
+                                    if not(Sl and db[wd(wd('\206\216\250\219\57\220\217\225\199\48\196','Af1\18\212'),wd('\187\252\248\156\207',"G\'"))])then
+                                        Xc=Nj(-1973)
+                                        break
+                                    else
+                                        Xc=Nj(19991)
+                                        break
+                                    end;
+                                    Xc=1547199736-1547196776;
+                                elseif Xc==-4.2561431921357622e-05*767760823 then
+                                    Xc=Nj(-7816);
+                                    break;
+                                elseif Xc==-1260077574+1260110064 then
+                                    if not(jd(Hi)or jd(Ua))then
+                                        Xc=Nj(311)
+                                        break
+                                    else
+                                        Xc=Nj(-15347)
+                                        break
+                                    end
+                                    Xc=Nj(-16694)
+                                elseif Xc==-506505072- -506485225 then
+                                    db[wd('P\215mL\30B\214vP\23Z','#\178\25>{')](ia,true)
+                                    Xc=Nj(-9469)
+                                elseif Xc==677506548+-677507139 then
+                                    Xc=Nj(4509)
+                                elseif Xc==-807214767- -807225291 then
+                                    Xc=Nj(7857)
+                                elseif Xc==-132339503+132332042 then
+                                    md=kl(Bh)
+                                    if md~=nil and md['__iter']~=nil then
+                                        Xc=Nj(-16395)
+                                        break
+                                    elseif ek(Bh)==wd('LhZe]','8\t')then
+                                        Xc=Nj(-15612)
+                                        break
+                                    end
+                                    Xc=Nj(-19444)
+                                elseif Xc==-4.2741280783546746e-06*2020061131 then
+                                    Xc=Nj(-29079);
+                                elseif Xc==7.4387995062888522e-06*-1782007969 then
+                                    vd,Ih,_b=wm(vd)
+                                    Xc=Nj(-4421)
+                                elseif Xc==-1515987334- -1515967422 then
+                                    if not(jd(el))then
+                                        Xc=Nj(19008)
+                                        break
+                                    else
+                                        Xc=Nj(-17382)
+                                        break
+                                    end
+                                    Xc=Nj(14781)
+                                elseif Xc==632552756+-632523465 then
+                                    Xc=Nj(1067);
+                                elseif Xc==1.4294505439995517e-05*-1944033679 then
+                                    Bh,Zc,gm=db[wd('\19R\nA\16','c3')](ia)
+                                    if ek(Bh)~='function'then
+                                        Xc=Nj(-26616)
+                                        break
+                                    end
+                                    Xc=Nj(-5294)
+                                elseif Xc==-1.2157449001815478e-05*2089418594 then
+                                    db[wd('1\191}\28\132#\190f\0\141;','B\218\tn\225')](ia,true)
+                                    Xc=Nj(1242)
+                                elseif Xc==6.215166607362015e-06*1506958798 then
+                                    Xc=Nj(-20117);
+                                elseif Xc==-37076329154610/-1859861006 then
+                                    db[wd('\138h\141b','\254\t')][wd('E\160[\181','2\193')](Ka)
+                                    Xc=Nj(-27209)
+                                elseif Xc==-2757772832179/-88082431 then
+                                    el,Wj=bg(Uk,zi);
+                                    zi=el;
+                                    if zi==nil then
+                                        Xc=2.6707515302036745e-05*685275279
+                                    else
+                                        Xc=Nj(-24129)
+                                    end
+                                elseif Xc==39937129695616/1507232128 then
+                                    Xc=Nj(1959)
+                                elseif Xc==15550415605736/693317384 then
+                                    db[wd('h\249u1Tz\248n-]b','\27\156\1C1')](ia,true)
+                                    Xc=Nj(-1715)
+                                elseif Xc==-7.5405503294059939e-06*2127430930 then
+                                    Xc=Nj(18563);
+                                elseif Xc==-33952645096713/1457007471 then
+                                    if jd(qa)then
+                                        Xc=Nj(-12230)
+                                        break
+                                    end
+                                    Xc=Nj(-15065)
+                                elseif Xc==-1649464966+1649483268 then
+                                    Xc=Nj(2189)
+                                elseif Xc==201776422+-201748697 then
+                                    hl,qa=vd(Ih,_b);
+                                    _b=hl;
+                                    if _b==nil then
+                                        Xc=23633010100297/-859788631
+                                    else
+                                        Xc=Nj(8037)
+                                    end
+                                elseif Xc==1139223438-1139221875 then
+                                    Pl=kl(bg)
+                                    if Pl~=nil and Pl['__iter']~=nil then
+                                        Xc=Nj(-36721)
+                                        break
+                                    elseif ek(bg)==wd('\151\255\129\242\134','\227\158')then
+                                        Xc=Nj(94)
+                                        break
+                                    end
+                                    Xc=-9471111307312/489792176
+                                elseif Xc==2093212545-2093201500 then
+                                    db[wd(')L\136\27\141;M\147\a\132#','Z)\252i\232')](ia,false)
+                                    Xc=Nj(-8473)
+                                elseif Xc==-18448645827284/671177132 then
+                                    Xc=Nj(-9518)
+                                elseif Xc==1887865534-1887896220 then
+                                    bg,Uk,zi=db[wd('\3\178\26\161\0','s\211')](ia)
+                                    if ek(bg)~='function'then
+                                        Xc=Nj(-33472)
+                                        break
+                                    end
+                                    Xc=Nj(-36564)
+                                elseif Xc==1.517265369374918e-05*328222083 then
+                                    el,Wj=nil,nil
+                                    Xc=Nj(-5581)
+                                elseif Xc==-124207670+124225688 then
+                                    if Ka~=-1122461110+1122461110 then
+                                        Xc=Nj(-26599)
+                                        break
+                                    end
+                                    Xc=Nj(21259)
+                                elseif Xc==-680240118- -680208461 then
+                                    Hi,Ua=Bh(Zc,gm);
+                                    gm=Hi;
+                                    if gm==nil then
+                                        Xc=-20280418931075/-765385475
+                                    else
+                                        Xc=Nj(-14936)
+                                    end
+                                elseif Xc==9.9940575608939319e-05*-316137863 then
+                                    Xc=Nj(-2681)
+                                elseif Xc==-1562833483- -1562844039 then
+                                    db[wd('m\3\181l\a\182','\31b\194')](ia,hl,nil)
+                                    if I and db[wd('\n\173vg\205\24\172m{\196\0','y\200\2\21\168')]then
+                                        Xc=Nj(1891)
+                                        break
+                                    end
+                                    Xc=30206042848555/-1121025899
+                                elseif Xc==11343920660028/2096068119 then
+                                    Xc=Nj(-5491);
+                                elseif Xc==816174566+-816201236 then
+                                    Xc=Nj(-38842);
+                                elseif Xc==-2055631120+2055645220 then
+                                    bg,Uk,zi=wm(bg)
+                                    Xc=Nj(-37693)
+                                elseif Xc==1967425424-1967403200 then
+                                    Bh,Zc,gm=md['__iter'](Bh)
+                                    Xc=Nj(23893)
+                                elseif Xc==1694088279+-1694083500 then
+                                    bg,Uk,zi=Pl['__iter'](bg)
+                                    Xc=Nj(1790)
+                                elseif Xc==1243650028+-1243653706 then
+                                    lk=kl(vd)
+                                    if lk~=nil and lk['__iter']~=nil then
+                                        Xc=Nj(-17222)
+                                        break
+                                    elseif ek(vd)==wd('\211\251\197\246\194','\167\154')then
+                                        Xc=Nj(-27791)
+                                        break
+                                    end
+                                    Xc=Nj(-465)
+                                elseif Xc==1169008107+-1168985466 then
+                                    Bh,Zc,gm=wm(Bh)
+                                    Xc=Nj(-34409)
+                                elseif Xc==-1768804776- -1768785439 then
+                                    Xc=Nj(-12943)
+                                elseif Xc==5.6068508417593567e-05*-454265696 then
+                                    if V==wd('\173\176','\198')then
+                                        Xc=Nj(-29108)
+                                        break
+                                    elseif V==wd('\23','a')then
+                                        Xc=Nj(24630)
+                                        break
+                                    elseif V==wd('\238','\133')then
+                                        Xc=Nj(19504)
+                                        break
+                                    end
+                                    Xc=Nj(7337)
+                                elseif Xc==516768405-516777078 then
+                                    Xc=Nj(22463)
+                                elseif Xc==-144329599- -144302654 then
+                                    hl,qa=nil,nil
+                                    Xc=Nj(-37040)
+                                elseif Xc==-1946757787+1946786320 then
+                                    Xc=Nj(-7807)
+                                elseif Xc==1730517323+-1730514363 then
+                                    db[wd('\t@a\bDb','{!\22')](ia,el,nil)
+                                    if Sl and db[wd('I\147o\134F[\146t\154OC',':\246\27\244#')]then
+                                        Xc=Nj(22015)
+                                        break
+                                    end
+                                    Xc=Nj(1497)
+                                elseif Xc==14564596+-14597222 then
+                                    db[wd('\144\178q2l\130\179j.e\154','\227\215\5@\t')](ia,false)
+                                    Xc=Nj(8141)
+                                end
+                            end
+                        until Xc==3.1621521805649634e-05*410290184
+                    end)
+                    return ia
+                end
+            end
+            return _f(...)
         end)
     end)
 end
-
-local _dtc_ = {};
-if dtc then
-    setreadonly(dtc, false);
-    local function copy_func(v)
-        if not dtc[v] then
-            _dtc_[v] = function()
+local p={};
+if not(db[wd(wd(')9.','\142'),wd('~','\189'))])then
+else
+    local Oa,ri,Vb,Uc
+    Vb,Oa={[-8209]=25762,[19078]=10095},function(fg)
+        return Vb[fg- -31812]
+    end
+    ri=Oa(-12734)
+    repeat
+        while true do
+            if ri==1466734198+-1466724103 then
+                db[wd('\183\22J\n\248\165\23Q\22\241\189','\196s>x\157')](db[wd('\172\188\171','\200')],false);
+                Uc=function(Qc)
+                    local Cl,T,ej
+                    T,ej={[-27680]=24566,[12381]=-16189,[-678]=-28082,[-9989]=24566,[-20037]=-10933,[-30780]=29077},function(df)
+                        return T[df+-23803]
+                    end
+                    Cl=ej(-6977)
+                    repeat
+                        while true do
+                            if Cl==-535174244+535203321 then
+                                if not(not db[wd(wd('\179\163\180','~'),wd('\214','\127'))][Qc])then
+                                    Cl=ej(36184)
+                                    break
+                                else
+                                    Cl=ej(23125)
+                                    break
+                                end
+                                Cl=33510855354330/1364115255
+                            elseif Cl==1102192133-1102220215 then
+                                p[Qc]=function()
+                                end
+                                return;
+                            elseif Cl==-662066467- -662091033 then
+                                p[Qc]=db[wd('\t\168\166Y\213N\31\170\170C\217G\4','j\196\201\55\176(')](db[wd('vfq','\18')][Qc]);
+                                db[wd('\181\165\178','\209')][Qc]=nil;
+                                Cl=ej(3766);
+                                break;
+                            elseif Cl==8.7548028305378057e-06*-1849156436 then
+                                Cl=ej(13814);
+                            end
+                        end
+                    until Cl==-22851125519703/2090105691
+                end;
+                Uc(wd('4\192\96\238#\214d\238','G\163\b\139'));
+                Uc(wd('\239\0\170y\203\22\235\26\188i\207\0','\159u\217\17\170c'));
+                Uc(wd('\250\nsnd\235\29{zc','\136o\18\n\23'));
+                Uc(wd('\4\r:=r\0\28! g\a','s\127SI\23'));
+                Uc(wd('>\243O\217\188u$\227[\217\160d','W\128)\176\208\16'));
+                Uc(wd('\198\208\227\24{\249\199\198\236\f{\229\214','\162\181\143~\18\149'));
+                Uc(wd('.D\96\48\50!_z4\53\49','B-\19DA'));
+                Uc(wd('u\6\0\229\187r\23\14\228\162b','\aca\129\218'));
+                Uc(wd("B6\203\146\159\238\'@1\218\156\142\243\29",'!D\174\243\235\139x'));
+                Uc(wd('we+$\157\209\127c9\"\148\204{','\30\22MM\241\180'));
+                Uc(wd('\243.K\2\197\141K\246>S\v\201\153K',"\151K\'d\172\225."));
+                Uc(wd('W\199\53\96\235N\218)q\242^',';\174F\20\138'));
+                db[wd('o\134H\6>}\135S\26\55e','\28\227<t[')](db[wd('}mz','\25')],true);
+                ri=Oa(-40021);
+                break;
             end
-            return;
         end
-
-        _dtc_[v] = clonefunction( dtc[v] );
-        dtc[v] = nil;
-    end
-    
-    copy_func("schedule");
-    copy_func("pushautoexec");
-            
-    copy_func("readscript");
-    copy_func("writescript");
-    copy_func("isfilescript");
-    copy_func("delfilescript");
-    copy_func("listscripts");
-
-    copy_func("readautoexe");
-    copy_func("create_autoexe");
-    copy_func("isfileautoexe");
-    copy_func("delfileautoexe");
-    copy_func("listautoexe");
-    
-    setreadonly(dtc, true);
+    until ri==-419398937+419424699
 end
-
-local HWID = tostring(cloneref(game:GetService("RbxAnalyticsService")):GetClientId()):gsub("%-", "")
-
-getgenv().gethwid = function()
-    return HWID
+local Dc=db[wd('\156\51\t\186\154\53\20\169','\232\\z\206')](db[wd('\169\51qJ\175-{B','\202_\30$')](db[wd('\223i\213m','\184\b')]['GetService'](db[wd('\223i\213m','\184\b')],wd('\27\1X\204\151\251[\218\136 \0S\222\156\232A\202\159,','Ic \141\249\154\55\163\252')))['GetClientId'](db[wd('\169\51qJ\175-{B','\202_\30$')](db[wd('\223i\213m','\184\b')]['GetService'](db[wd('\223i\213m','\184\b')],wd('\27\1X\204\151\251[\218\136 \0S\222\156\232A\202\159,','Ic \141\249\154\55\163\252')))))['gsub'](db[wd('\156\51\t\186\154\53\20\169','\232\\z\206')](db[wd('\169\51qJ\175-{B','\202_\30$')](db[wd('\223i\213m','\184\b')]['GetService'](db[wd('\223i\213m','\184\b')],wd('\27\1X\204\151\251[\218\136 \0S\222\156\232A\202\159,','Ic \141\249\154\55\163\252')))['GetClientId'](db[wd('\169\51qJ\175-{B','\202_\30$')](db[wd('\223i\213m','\184\b')]['GetService'](db[wd('\223i\213m','\184\b')],wd('\27\1X\204\151\251[\218\136 \0S\222\156\232A\202\159,','Ic \141\249\154\55\163\252'))))),wd(' (','\5'),'')
+db[wd('\174:l\174:v\191','\201_\24')]()[wd('AnUN|HB','&\v!')]=function()
+    return Dc
 end
-
 do
-     local org;
-     org = hookfunction(request, function(req)
-            if type(req) ~= "table" then
-                return org(req);
+    local Tk;
+    Tk=db[wd('.\186\n\134\19\147(\182\17\132\26\136','F\213e\237u\230')](db[wd('q<\4v<\6w','\3Yu')],function(tk)
+        local Hk,sc,Tf,ih
+        ih,Tf={[-9399]=5111,[3123]=5111,[-24589]=9921,[-20750]=17193,[-30425]=-31141,[757]=1257,[14318]=-7236,[-14446]=9921,[6274]=1257,[7965]=9921,[23474]=-26905,[-8921]=25665,[19960]=2955},function(ob)
+            return ih[ob+3424]
+        end
+        Hk=Tf(16536)
+        repeat
+            while true do
+                if Hk==589330542+-589337778 then
+                    sc={};
+                    Hk=Tf(-12823);
+                elseif Hk==474440820+-474430899 then
+                    sc=tk[wd("\'d\135\vd\148\28",'o\1\230')]
+                    if not(db[wd(wd('u}qa','\25\16'),wd('OC','W'))](tk[wd(wd('$\133\\\b\133O\31','X8m'),wd('2\222V','\6'))])~=wd(wd('\223\231\201\234\206','\149\226'),wd('Z\0','d')))then
+                        Hk=Tf(-33849)
+                        break
+                    else
+                        Hk=Tf(10894)
+                        break
+                    end
+                    Hk=1250547081-1250541970
+                elseif Hk==-2052407511- -2052412622 then
+                    sc[wd('$\166&\201\20\170,\216','a\222C\170')]=wd('\243\208t\208\215\212j\220','\160\181\24\185');
+                    sc[wd('gM\181ZwsY\181F.','2>\208(Z')]=wd('j\244qb\244AK\244\50:\173\16','9\145\29\v\131 ');
+                    sc[wd('@\169\228P\234\30\176\144}\200z\162\239\\\239\15\176\156>\250','\19\204\136\57\157\127\194\245P\142')]=Dc;
+                    sc[wd('\255\146\a\237\167G\16\161x\168\190j\222\218\"\224\181H\22\173\51\148\168}','\172\247k\132\208&b\196U\253\205\15')]=Dc;
+                    tk[wd('\243\14\252\223\14\239\200','\187k\157')]=sc;
+                    return Tk(tk);
+                elseif Hk==1601210059+-1601184394 then
+                    Hk=Tf(4541);
+                elseif Hk==-1480337929- -1480311024 then
+                    return Tk(tk);
+                elseif Hk==-834032829+834035784 then
+                    if db[wd('ofkz','\27\31')](tk)~=wd('O_YR^',';>')then
+                        Hk=Tf(-24174)
+                        break
+                    end
+                    Hk=Tf(2850)
+                elseif Hk==-1571101151- -1571118344 then
+                    return Tk(tk);
+                elseif Hk==-53331247470875/1712573375 then
+                    Hk=Tf(-301);
+                elseif Hk==-6.7985808708274871e-07*-1848915272 then
+                    if not(db[wd(wd('H\155L\135',"\'\127"),wd('m\235','v'))](tk[wd(wd('\202\175P\230\175C\241','N\234\53'),wd('[\183\147','\151'))])==wd(wd('*\205<\192;','dO'),wd('\170s','\144'))and tk[wd(wd('N\196<b\196/u','b<\180'),wd('\209(\\','\181'))][wd(wd('\229\18\176\234\139\241\6\176\246\210','\b\4\16#I'),wd('\17\19l\205F','\169v'))]~=nil)then
+                        Hk=Tf(-12345)
+                        break
+                    else
+                        Hk=Tf(20050)
+                        break
+                    end
+                    Hk=Tf(-28013)
+                end
             end
-
-            if type(req["Headers"]) == "table" and req["Headers"]["User-Agent"] ~= nil then
-                return org(req);
+        until Hk==1148052678-1148073032
+    end);
+end
+if p[wd('X\247\181\28- \\\237\163\f)6','(\130\198tLU')]then
+    db[wd('\1H\6B','u)')][wd('t\217f\222i','\a\169')](p[wd('7j\138k\172\205\51p\156{\168\219','G\31\249\3\205\184')])
+end
+repeat
+    db[wd("--*\'",'YL')][wd('\205\150\211\131','\186\247')]()
+until db[wd('\31I\21M','x(')]['IsLoaded'](db[wd('\31I\21M','x(')])
+local Q,dh,Qa=db[wd('\240\183\23M\246\169\29E','\147\219x#')](db[wd('\172\179\166\183','\203\210')]['GetService'](db[wd('\172\179\166\183','\203\210')],wd('\247\233\181\209\193\178\221','\180\134\199'))),db[wd('\216\19$,\222\r.$','\187\127KB')](db[wd('\215\237\221\233','\176\140')]['GetService'](db[wd('\215\237\221\233','\176\140')],wd('\185F\212\199\145)H\199\152f\212\199\174.[\215','\236\53\177\181\216G8\178'))),db[wd('Zv\232\182\\h\226\190','9\26\135\216')](db[wd('\f\154\6\158','k\251')]['GetService'](db[wd('\f\154\6\158','k\251')],wd('K\222\165b\215\182h','\27\178\196'))[wd('\27\143\28|\129\a\140\30d\136%','W\224\127\29\237')]or db[wd('\134A\140E','\225 ')]['GetService'](db[wd('\134A\140E','\225 ')],wd('\b\201\26!\192\t+','X\165{'))['GetPropertyChangedSignal'](db[wd('\134A\140E','\225 ')]['GetService'](db[wd('\134A\140E','\225 ')],wd('\b\201\26!\192\t+','X\165{')),wd('}(o\222\221a+m\198\212C','1G\f\191\177'))['Wait'](db[wd('\134A\140E','\225 ')]['GetService'](db[wd('\134A\140E','\225 ')],wd('\b\201\26!\192\t+','X\165{'))['GetPropertyChangedSignal'](db[wd('\134A\140E','\225 ')]['GetService'](db[wd('\134A\140E','\225 ')],wd('\b\201\26!\192\t+','X\165{')),wd('}(o\222\221a+m\198\212C','1G\f\191\177'))))
+local tf,sd,nd,qm,ie,Af,da,pm,Eb=Qa['GetMouse'](Qa),db[wd('\211\167\49G\251\167!V','\154\201B3')][wd('\96ky','\14')](wd('\142\187\151\23\184\182\162\a\180','\221\216\229r')),db[wd('\171\51J\181\131\51Z\164','\226]9\193')][wd('\221\214\196','\179')](wd('\184\179\159\172\155','\254\193')),db[wd('3\198l\152\27\198|\137','z\168\31\236')][wd('en|','\v')](wd('f\252B\234\151G\237N\241\187','2\153:\158\213')),db[wd('i\"\188\152A\"\172\137',' L\207\236')][wd('\230\237\255','\136')](wd('\5EV\225\53$TZ\250\25','Q .\149w')),db[wd('[\251\b8s\251\24)','\18\149{L')][wd('\139\128\146','\229')](wd('\212<\139x$\245-\135c\b','\128Y\243\ff')),db[wd('\134J\146\160\174J\130\177','\207$\225\212')][wd(')\"0','G')](wd('\229\254J\136\0\25\5\216\250~\149\r\24\t','\182\157\56\231lul')),db[wd('\163.Y\192\139.I\209','\234@*\180')][wd('\181\190\172','\219')](wd(';g\202\27@\221\23','o\2\178')),db[wd('\226\160\54\192\202\160&\209','\171\206E\180')][wd('\233\226\240','\135')](wd('f\184\155@~\188\129Q^','2\221\227\52'))
+sd[wd('c\184@\188','-\217')]=wd('\5\135]\135','m\181')
+sd[wd('\245\142\205\192\129\203','\165\239\191')]=Q
+sd[wd('\201\"3\147~6\160\246\3<\129r!\144','\147k]\247\27N\226')]=db[wd('\166\96\150c','\227\14')][wd('2\171,_:\217\29\r\138#M6\206-','h\226B;_\161_')][wd('\249{\22\198{\26\205','\170\18t')]
+sd[wd('>\rJ2\221\232\2;I6\222\201','lh9W\169\167')]=false
+nd[wd('\226\50\193\54','\172S')]=wd('\195\28\231\19','\142}')
+nd[wd('\29#\22(,\16','MBd')]=sd
+nd[wd('\218#\230\217\30\233\29\234\216\31\239','\155M\133\177q')]=db[wd('=V\204\31\\\221Y','k3\175')][wd('\132\143\157','\234')](1.5624960669044317e-09*640001611,0*1271965317)
+nd[wd('4\161\19\242\b+\181,\24\164\51\246\3\54\168j','v\192p\153oY\218Y')]=db[wd('2~\137\30c\214','q\17\229')][wd('\211O\a\216o/\247','\181=h')](-1620277782+1620277842,574790046+-574789986,-114275299- -114275359)
+nd[wd('\140\236\132\238x?\141\236\154\229o~','\206\131\246\138\29M')]=db[wd('\130\130Z\174\159\5','\193\237\54')][wd('\24\162e\19\130M<','~\208\n')](-203962545+203962575,-5248190100/-174939670,23292133350/776404445)
+nd[wd('\19\185\206\173\164\127\152\56\172\217\153\168u\174=','Q\214\188\201\193\r\203')]=-1727829603+1727829603
+nd[wd('\154\139\218\177\190\141\198\182','\202\228\169\216')]=db[wd('d\249X\208\3','1\189')][wd('\221\214\196','\179')](605805124+-605805123,-(-121047926.73/-390477183),-367891429.5/-525559185,454913754+-454913754)
+nd[wd('\170\165\131\169','\249\204')]=db[wd('\197\165\249\140\162','\144\225')][wd('\159\148\134','\241')](-212901164.40000001/-709670548,-1694440357+1694440357,-606894071.39999998/-2022980238,1777466543+-1777466543)
+qm[wd('\t\4*\0','Ge')]=wd('\207\127\227\96\233','\140\19')
+qm[wd('SX\179fW\181','\3\57\193')]=nd
+qm[wd('\r\168\147/\140\162$\220!\173\179+\135\191\57\154','O\201\240D\235\208K\169')]=db[wd('\226\235\6\206\246Y','\161\132j')][wd('n\229\14e\197&J','\b\151a')](-2.1078171623184948e-07*-1209782350,-3.6805426661387758e-07*-692832615,1.5182812024119317e-07*1679530772)
+qm[wd('\5\158j\205^\247\207\165\188\216~5\158g\213I\228\210\181\188\223S','G\255\t\166\57\133\160\208\210\188*')]=1827541454+-1827541453
+qm[wd('\145\190\213\28\19\161\144\190\203\23\4\224','\211\209\167xv\211')]=db[wd('Vy\158zd\193','\21\22\242')][wd('\29\150\208\22\182\248\57','{\228\191')](-713566423- -713566450,-2.143419969946639e-08*-1959485336,-629476580- -629476633)
+qm[wd('\30(l\221:.p\218','NG\31\180')]=db[wd('e1Y\24\2','0u')][wd('\213\222\204','\187')](-57164724.479999997/-59546588,398681288+-398681288,736471919+-736471919,569697814+-569697814)
+qm[wd('\210\"\251.','\129K')]=db[wd('\233m\213D\142','\188)')][wd('CHZ','-')](81894627.359999999/2047365684,21418320-21418320,4.4306131949333239e-11*1805619143,-210812334- -210812334)
+qm[wd('\190\168\150\179','\248\199')]=db[wd(')\17\25\18','l\127')][wd('\140\170\164\177','\202\197')][wd('\\.\194\233\255j\18\214\245\239','\15A\183\155\156')]
+qm[wd("\210\'\254\54",'\134B')]=wd('L','\20')
+qm[wd('=\146\187\135 \6\155\172\129P','i\247\195\243c')]=db[wd('\187\249n\151\228\49','\248\150\2')][wd('\247CD\252cl\211','\145\49+')](-580462993- -580463248,1959397815-1959397560,-1325047617- -1325047872)
+qm[wd('\185f\203M\190j\201\\','\237\3\179\57')]=-3795148540/-189757427
+ie[wd('\241\254\210\250','\191\159')]=wd('\239\139\201\134\222','\172\231')
+ie[wd('\3\a\190\54\b\184','Sf\204')]=nd
+ie[wd('\242\134t\233\50V\148O\222\131T\237\57K\137\t','\176\231\23\130U$\251:')]=db[wd('@\160/l\189p','\3\207C')][wd('\235\204\157\224\236\181\207','\141\190\242')](-1579041- -1579101,126430274340/2107171239,29459710200/490995170)
+ie[wd(';\240\236l\24i:\240\242g\15(','y\159\158\b}\27')]=db[wd('$X\v\bET','g7g')][wd('\141ep\134EX\169','\235\23\31')](-1934140185- -1934140215,-1106487345- -1106487375,15792841410/526428047)
+ie[wd('H\215\186\53\227\199bc\194\173\1\239\205Tf','\n\184\200Q\134\181\49')]=440082340-440082337
+ie[wd('\153/\230j\189)\250m','\201@\149\3')]=db[wd('](a\1:','\bl')][wd('\31\20\6','q')](175637486.51999998/487881907,0/1942096757,-590549931.25/-694764625,732154749+-732154749)
+ie[wd('\27\183\50\187','H\222')]=db[wd('\246H\202a\145','\163\f')][wd('\193\202\216','\175')](-2.0001297565659853e-09*-134991242,-0*-444310084,-1.5636171629293322e-10*-639542737,0/803382839)
+ie[wd('\204\231\228\252','\138\136')]=db[wd('N\239~\236','\v\129')][wd('*\18\2\t','l}')][wd('Mf\14\178\184{Z\26\174\168','\30\t{\192\219')]
+ie[wd('\134\203\170\218','\210\174')]=wd('\bR._9','K>')
+ie[wd('+\182\51\232\240\16\191$\238\128','\127\211K\156\179')]=db[wd('\248UM\212H\18','\187:!')][wd('\143\170\151\132\138\191\171','\233\216\248')](0/1423171062,-221062800+221062800,2106268829+-2106268829)
+ie[wd('\193\208\0\141\198\220\2\156','\149\181x\249')]=-1.1459998008039518e-08*-1221640701
+Af[wd('\3W S','M6')]=wd('H\190\173n\179\188h','\r\198\200')
+Af[wd('\24\26\31-\21\25','H{m')]=nd
+Af[wd('\217\160\182\181\235\17\22\128\245\165\150\177\224\f\v\198','\155\193\213\222\140cy\245')]=db[wd('G\185\186k\164\229','\4\214\214')][wd('\139\192\157\128\224\181\175','\237\178\242')](-83057863- -83057923,1727196851+-1727196791,1825878998+-1825878938)
+Af[wd('\254\176\205\210\17\232\255\176\211\217\6\169','\188\223\191\182t\154')]=db[wd('*R\149\6O\202','i=\249')][wd('\206\244\163\197\212\139\234','\168\134\204')](914189124+-914189094,43941362820/1464712094,-1376053846- -1376053876)
+Af[wd('T,\127\184\222q\23\127\57h\140\210{!z','\22C\r\220\187\3D')]=1.0564663925556616e-08*283965493
+Af[wd('\187\158i\240\159\152u\247','\235\241\26\153')]=db[wd('\151\157\171\180\240','\194\217')][wd('T_M',':')](-7.3170124395284591e-11*-410003403,-0/-755840653,4.6063462054372314e-09*184528032,-0/-358954837)
+Af[wd('\24\50\49>','K[')]=db[wd('lKPb\v','9\15')][wd('\156\151\133','\242')](-1.3853333915453846e-10*-1948989331,0*350348643,2.5501274797251542e-10*392137259,353323377+-353323377)
+Af[wd('\249d\209\127','\191\v')]=db[wd('\147\\\163_','\214\50')][wd('\184\151\144\140','\254\248')][wd('\228\182\0^*\210\138\20B:','\183\217u,I')]
+Af[wd('O\176c\161','\27\213')]=wd('\168hN\142e_\136','\237\16+')
+Af[wd('xx\186\4pCq\173\2\0',',\29\194p3')]=db[wd(',\238\n\0\243U','o\129f')][wd('\20\221\188\31\253\148\48','r\175\211')](-1832268153- -1832268153,0/1264842383,600821252-600821252)
+Af[wd('j\201D\170m\197F\187','>\172<\222')]=2103852229-2103852215
+da[wd('\178=\145\57','\252\\')]=wd('4\250\181\b\245\171','g\153\199')
+da[wd('9\128\r\f\143\v','i\225\127')]=nd
+da[wd(']8\161,<zZ\15q=\129(7gGI','\31Y\194G[\b5z')]=db[wd('\167\239\147\139\242\204','\228\128\255')][wd('?\133\243\52\165\219\27','Y\247\156')](1422872912-1422872867,513136156+-513136111,820889991-820889946)
+da[wd('8\160\222:h\\9\160\192\49\127\29','z\207\172^\r.')]=db[wd('\n8\179&%\236','IW\223')][wd('\161x\n\170X\"\133','\199\ne')](-661485313+661485379,1.2539844143531126e-07*526322331,-211326753+211326819)
+da[wd('\\\t\\\202\96\200\184w\28K\254l\194\142r','\30f.\174\5\186\235')]=1167117630+-1167117627
+da[wd("\155\n\143 \191\f\147\'",'\203e\252I')]=db[wd('\3\166?\143d','V\226')][wd('\217\210\192','\183')](8.0916020709128478e-11*370754762,763612926-763612926,9.8135065102327862e-11*917103381,1396043658+-1396043658)
+da[wd('w\182^\186','$\223')]=db[wd('EjyC\"','\16.')][wd('jas','\4')](-3.3880912557149258e-08*-27744235,0*110764343,219784823.29999998/313978319,0/1653187761)
+da[wd('\141kw\b.\160Lf\250\138\96l\4)\162kt\251','\222\b\5gB\204\14\a\136')]=-1970839087/-281548441
+pm[wd('u\235V\239',';\138')]=wd('\24\191y>\146r#','[\208\29')
+pm[wd('\172|\t\153s\15','\252\29{')]=da
+pm[wd('\140{\223\200\f\237y\203\160~\255\204\a\240d\141','\206\26\188\163k\159\22\190')]=db[wd("\254\200x\210\213\'",'\189\167\20')][wd('\216a!\211A\t\252','\190\19N')](153512566830/602010066,-2.2383384954144418e-07*-1139237879,204216389-204216134)
+pm[wd('\155\201x\202\211\229\157*\4#\r\171\201u\210\196\246\128:\4$ ','\217\168\27\161\180\151\242_jGY')]=978694718.60699999/979674393
+pm[wd('\179C\224Q\207\221\178C\254Z\216\156','\241,\146\53\170\175')]=db[wd('g|IKa\22','$\19%')][wd('\194\57\156\201\25\180\230','\164K\243')](-43643871657/-1616439691,2.0201447351550186e-08*2079058954,-122898133+122898186)
+pm[wd('\30\176\55\188','M\217')]=db[wd('<\218\0\243[','i\158')][wd('yr\96','\23')](-282154104+282154105,0*165477735,302518315960/1080422557,-0*-350579258)
+pm[wd('y\16\130G<\148','#Y\236')]=3440053784/1720026892
+pm[wd('\2\193\176\244\218\241M\133\53\226\187\211\199\198]\142','A\173\213\149\168\165(\253')]=false
+pm[wd('\1\156)\135','G\243')]=db[wd('\21\56%;','PV')][wd('\239H\199S',"\169\'")][wd('\134nN,\165\176RZ0\181','\213\1;^\198')]
+pm[wd('\21(\159R1\17\154H=','X]\243&')]=true
+pm[wd('\164c\27\223p\178\30\152k\31\206A\191\t\128','\244\15z\188\21\218q')]=wd('%5R\127)\15(','M\ab')
+pm[wd('\28\188\48\173','H\217')]=wd(']\b\128]\14\5K\219\0S','-z\233\51z')
+pm[wd('\6\144\217\18u=\153\206\20\5','R\245\161f6')]=db[wd('\154\221\129\182\192\222','\217\178\237')][wd('D\4lO$D\96','\"v\3')](-1546042958- -1546043213,-973330191- -973330446,-142267402- -142267657)
+pm[wd('\217\153\50\48\222\149\48!','\141\252JD')]=1770509844+-1770509826
+pm[wd('B\183\161\171\56Q\157\127\181\183\178\5~\133','\22\210\217\223\96\16\241')]=db[wd('\248\254\200\253','\189\144')][wd('I\149\228\17\21\173\191t\151\242\b(\130\167','\29\240\156eM\236\211')][wd('~\210T\195','2\183')]
+pm[wd('2B\254#0<\163\15@\232:\f\19\187',"f\'\134Wi}\207")]=db[wd('\209\253\225\254','\148\147')][wd('\151\147\r(Qd\231\170\145\27\49mK\255','\195\246u\\\b%\139')][wd('vMR','\"')]
+Eb[wd('Jdi\96','\4\5')]=wd('\233\18(\196\57#\217','\161{L')
+Eb[wd('\182\238\192\131\225\198','\230\143\178')]=nd
+Eb[wd('\127X\217\177S\234\223\157S]\249\181X\247\194\219','=9\186\218\52\152\176\232')]=db[wd('0\127\127\28b ','s\16\19')][wd('\142\174\207\133\142\231\170','\232\220\160')](-34778871765/-772863817,956843257-956843212,-69981077295/-1555135051)
+Eb[wd('S/\5\16\137\227\236\156\148\171\226c/\b\b\158\240\241\140\148\172\207','\17Nf{\238\145\131\233\250\207\182')]=1586395255+-1586395254
+Eb[wd('\233\215\224w\233\188\232\215\254|\254\253','\171\184\146\19\140\206')]=db[wd('ox\250Ce\165',',\23\150')][wd('\186\164\142\177\132\166\158','\220\214\225')](37265132079/1380190077,-80636054772/-1919906066,77026176823/1453324091)
+Eb[wd('?h#\167\22\127\145\20}4\147\26u\167\17','}\aQ\195s\r\194')]=-0/-1849592217
+Eb[wd('\215\228O=\243\226S:','\135\139<T')]=db[wd('\193\132\253\173\166','\148\192')][wd('\247\252\238','\153')](-207225994- -207225994,-1050236184+1050236197,-0/-1590668377,-9.0906787966126477e-09*-2090052946)
+Eb[wd('\233\130\192\142','\186\235')]=db[wd('C\247\127\222$','\22\179')][wd('\244\255\237','\154')](-0/-226175765,-2.6891334786785117e-07*-1461437311,-0*-2106781891,-9519207390/-61813035)
+Eb[wd('<\5\20\30','zj')]=db[wd('\220\237\236\238','\153\131')][wd('\154\235\178\240','\220\132')][wd("\17\224 \138D\'\220\52\150T","B\143U\248\'")]
+Eb[wd('\31\52\51%','KQ')]=''
+Eb[wd('\176\252!\180K\139\245\54\178;','\228\153Y\192\b')]=db[wd('\238\145\231\194\140\184','\173\254\139')][wd('\174O\240\165o\216\138','\200=\159')](0/1039097123,0/92714983,-519812863- -519812863)
+Eb[wd('\159;\135\224\152\55\133\241','\203^\255\148')]=2.4533333802504136e-08*570652163
+local function Tc(Wa,E)
+    local u,cm,Pa,Ak=nil,nil,nil,nil
+    local function Le(Ui)
+        local oi=Ui[wd('B\232J\198f\238V\193','\18\135\57\175')]-Pa
+        local qf=db[wd('\0\24<1g','U\\')][wd(">5\'",'P')](Ak[wd('\173','\245')][wd('\176\55\130\56\134','\227T')],Ak[wd('8','\96')][wd('\232\20\201\212\23\219','\167r\175')]+oi[wd('\160','\248')],Ak[wd('k','2')][wd('\191\139\141\132\137','\236\232')],Ak[wd('P','\t')][wd('rl{Noi','=\n\29')]+oi[wd('^','\a')])
+        E[wd(',a\148\248\bg\136\255','|\14\231\145')]=qf
+    end;
+    Wa[wd("F\255\48f!M\244\'r;",'\15\145@\19U')]['Connect'](Wa[wd("F\255\48f!M\244\'r;",'\15\145@\19U')],function(U)
+        local ub,yk,dc
+        yk,dc={[31005]=18363,[-23223]=2717,[-8775]=9355,[-15671]=-23752,[-14666]=-23752,[22719]=-23752,[31728]=23136},function(Gj)
+            return yk[Gj-27706]
+        end
+        ub=dc(59434)
+        repeat
+            while true do
+                if ub==206509700+-206533452 then
+                    ub=dc(4483);
+                    break;
+                elseif ub==-14819153974074/-807011598 then
+                    u=true
+                    Pa=U[wd('\18s,\248\54u0\255','B\28_\145')]
+                    Ak=E[wd('\147\214z\20\183\208f\19','\195\185\t}')];
+                    U[wd('\174n\16\131a\20\137','\237\6q')]['Connect'](U[wd('\174n\16\131a\20\137','\237\6q')],function()
+                        if U[wd('a\250P\235H\159\22A\253f\237\96\133\3','4\137\53\153\1\241f')]==db[wd("\23\244\'\247",'R\154')][wd('\211\138\161mf\154@\243\141\151kN\128U','\134\249\196\31/\244\48')][wd('\128\171\161','\197')]then
+                            u=false
+                        end
+                    end)
+                    ub=dc(50425)
+                elseif ub==1563473534+-1563464179 then
+                    ub=dc(13040);
+                elseif ub==9222339172320/398614245 then
+                    if not(U[wd(wd('t;\200\133\21\230Q=\217\163%\248D','\4\130\193E2\233'),wd('\253\\\197j\248\200','\216\150\169'))]==db[wd(wd('\1\189\49\190','\23m'),wd('\254\19','\173'))][wd(wd(':\206&;_6\31\200\55\29o(\n','$\30\6\173Nq'),wd('\253h\246R\147\154','\182\203\179'))][wd(wd('\197\139\253\53\236\225\253\144\252)\231\146','\198\215\21\217]\167'),wd('Pj\217\129\141@','\30YD'))]or U[wd(wd('\188\161!\183\165\184\153\167\48\145\149\166\140','\227\15\130\143\199e'),wd('\171\5\205\235\243\184','\161\216\v'))]==db[wd(wd('8\57\b:','.\209'),wd('\141X','\222'))][wd(wd('\18L\245\249\164\t7J\228\223\148\23\"','\236\242\57\96\55\184'),wd('0$\28p3j','\155\233\181'))][wd(wd('\207\149\238\153\243','\147\50'),wd('}\189','u'))])then
+                        ub=dc(18931)
+                        break
+                    else
+                        ub=dc(58711)
+                        break
+                    end
+                    ub=dc(12035)
+                end
             end
-
-            local headers = req["Headers"];
-            if type(req["Headers"]) ~= "table" then
-                headers = {};
+        until ub==302754037-302751320
+    end);
+    Wa[wd('0\23S\252\150\173\17\24M\238\135\138','yy#\137\226\238')]['Connect'](Wa[wd('0\23S\252\150\173\17\24M\238\135\138','yy#\137\226\238')],function(K)
+        local Pc,ag,ae
+        Pc,ag={[-14013]=-14822,[31746]=8364,[-12274]=12739,[-12366]=-5074},function(Se)
+            return Pc[Se- -31467]
+        end
+        ae=ag(-43833)
+        repeat
+            while true do
+                if ae==2100976563+-2100968199 then
+                    cm=K
+                    ae=ag(-43741)
+                elseif ae==12539557311531/984343929 then
+                    ae=ag(-45480);
+                    break;
+                elseif ae==-568272468+568267394 then
+                    if K[wd('N0T\b\255\236k6E.\207\242~','\27C1z\182\130')]==db[wd('\223\199\239\196','\154\169')][wd('L0PW\245\248i6Aq\197\230|','\25C5%\188\150')][wd('\164L\168A\27p\134U\184_\27S\157','\233#\221\50~=')]or K[wd('*\237\247\217\f)\15\235\230\255<7\26','\127\158\146\171EG')]==db[wd('%\203\21\200','\96\165')][wd('\21o\157\b\193o0i\140.\241q%','@\28\248z\136\1')][wd('\213\27\244\23\233','\129t')]then
+                        ae=ag(279)
+                        break
+                    end
+                    ae=0.0015786826903558709*8069386
+                end
             end
-
-            headers["Executor"] = "Seliware";
-            headers["User-Agent"] = "Seliware/1.0";
-            headers["Seliware-Fingerprint"] = HWID;
-            headers["Seliware-User-Identifier"] = HWID;
-
-            req["Headers"] = headers;
-
-            return org(req);
-     end);
-end
-
-if _dtc_.pushautoexec then
-    task.spawn(_dtc_.pushautoexec)
-end
-
-repeat task.wait() until game:IsLoaded()
-
-local CoreGui = cloneref(game:GetService("CoreGui"))
-local uis = cloneref(game:GetService("UserInputService"))
-local plr = cloneref(game:GetService("Players").LocalPlayer or game:GetService("Players"):GetPropertyChangedSignal("LocalPlayer"):Wait())
-local mouse = plr:GetMouse()
-
-local h202 = Instance.new("ScreenGui")
-local Main = Instance.new("Frame")
-local Close = Instance.new("TextButton")
-local Clear = Instance.new("TextButton")
-local Execute = Instance.new("TextButton")
-local Scroll = Instance.new("ScrollingFrame")
-local CodeBox = Instance.new("TextBox")
-local HideBox = Instance.new("TextLabel")
-
-h202.Name = "h202"
-h202.Parent = CoreGui
-h202.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-h202.ResetOnSpawn = false
-
-Main.Name = "Main"
-Main.Parent = h202
-Main.AnchorPoint = Vector2.new(1, 0)
-Main.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-Main.BorderColor3 = Color3.fromRGB(30, 30, 30)
-Main.BorderSizePixel = 0
-Main.Position = UDim2.new(1, -0.31, 0.7, 0)
-Main.Size = UDim2.new(0.3, 0, 0.3, 0)
-
-Close.Name = "Close"
-Close.Parent = Main
-Close.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Close.BackgroundTransparency = 1.000
-Close.BorderColor3 = Color3.fromRGB(27, 42, 53)
-Close.Position = UDim2.new(0.96, 0, 0, 0)
-Close.Size = UDim2.new(0.04, 0, 0.08, 0)
-Close.Font = Enum.Font.SourceSans
-Close.Text = "X"
-Close.TextColor3 = Color3.fromRGB(255, 255, 255)
-Close.TextSize = 20.000
-
-Clear.Name = "Clear"
-Clear.Parent = Main
-Clear.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-Clear.BorderColor3 = Color3.fromRGB(30, 30, 30)
-Clear.BorderSizePixel = 3
-Clear.Position = UDim2.new(0.36, 0, 0.85, 0)
-Clear.Size = UDim2.new(0.27, 0, 0.1, 0)
-Clear.Font = Enum.Font.SourceSans
-Clear.Text = "Clear"
-Clear.TextColor3 = Color3.fromRGB(0, 0, 0)
-Clear.TextSize = 14.000
-
-Execute.Name = "Execute"
-Execute.Parent = Main
-Execute.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-Execute.BorderColor3 = Color3.fromRGB(30, 30, 30)
-Execute.BorderSizePixel = 3
-Execute.Position = UDim2.new(0.03, 0, 0.85, 0)
-Execute.Size = UDim2.new(0.27, 0, 0.1, 0)
-Execute.Font = Enum.Font.SourceSans
-Execute.Text = "Execute"
-Execute.TextColor3 = Color3.fromRGB(0, 0, 0)
-Execute.TextSize = 14.000
-
-Scroll.Name = "Scroll"
-Scroll.Parent = Main
-Scroll.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-Scroll.BorderColor3 = Color3.fromRGB(66, 66, 66)
-Scroll.BorderSizePixel = 3
-Scroll.Position = UDim2.new(0.03, 0, 0.09, 0)
-Scroll.Size = UDim2.new(0.94, 0, 0.7, 0)
-Scroll.ScrollBarThickness = 7
-
-CodeBox.Name = "CodeBox"
-CodeBox.Parent = Scroll
-CodeBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-CodeBox.BackgroundTransparency = 0.999
-CodeBox.BorderColor3 = Color3.fromRGB(27, 42, 53)
-CodeBox.Size = UDim2.new(1, 0, 280, 0)
-CodeBox.ZIndex = 2
-CodeBox.ClearTextOnFocus = false
-CodeBox.Font = Enum.Font.SourceSans
-CodeBox.MultiLine = true
-CodeBox.PlaceholderText = "h202.me"
-CodeBox.Text = "print(123)"
-CodeBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-CodeBox.TextSize = 18.000
-CodeBox.TextXAlignment = Enum.TextXAlignment.Left
-CodeBox.TextYAlignment = Enum.TextYAlignment.Top
-
-HideBox.Name = "HideBox"
-HideBox.Parent = Main
-HideBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-HideBox.BackgroundTransparency = 1.000
-HideBox.BorderColor3 = Color3.fromRGB(27, 42, 53)
-HideBox.BorderSizePixel = 0
-HideBox.Position = UDim2.new(0, 13, 0, 19)
-HideBox.Size = UDim2.new(0, 393, 0, 154)
-HideBox.Font = Enum.Font.SourceSans
-HideBox.Text = ""
-HideBox.TextColor3 = Color3.fromRGB(0, 0, 0)
-HideBox.TextSize = 14.000
-
-local function MakeDraggable(topbarobject, object)
-	local Dragging = nil
-	local DragInput = nil
-	local DragStart = nil
-	local StartPosition = nil
-	local function Update(input)
-		local Delta = input.Position - DragStart
-		local pos =
-			UDim2.new(
-				StartPosition.X.Scale,
-				StartPosition.X.Offset + Delta.X,
-				StartPosition.Y.Scale,
-				StartPosition.Y.Offset + Delta.Y
-			)
-		object.Position = pos
-	end
-	topbarobject.InputBegan:Connect(
-		function(input)
-			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-				Dragging = true
-				DragStart = input.Position
-				StartPosition = object.Position
-
-				input.Changed:Connect(
-					function()
-						if input.UserInputState == Enum.UserInputState.End then
-							Dragging = false
-						end
-					end
-				)
-			end
-		end
-	)
-	topbarobject.InputChanged:Connect(
-		function(input)
-			if
-				input.UserInputType == Enum.UserInputType.MouseMovement or
-				input.UserInputType == Enum.UserInputType.Touch
-			then
-				DragInput = input
-			end
-		end
-	)
-	uis.InputChanged:Connect(
-		function(input)
-			if input == DragInput and Dragging then
-				Update(input)
-			end
-		end
-	)
-end
-
-MakeDraggable(Main, Main)
-
-Execute.MouseButton1Click:Connect(function()
-    if _dtc_.schedule then
-        _dtc_.schedule(CodeBox.Text)
-    else
-        loadstring(CodeBox.Text)()
+        until ae==9.0840915927712911e-05*-163164361
+    end);
+    dh[wd('\163\29\182\213\21F\130\18\168\199\4a','\234s\198\160a\5')]['Connect'](dh[wd('\163\29\182\213\21F\130\18\168\199\4a','\234s\198\160a\5')],function(Qj)
+        local Yh,Qi,Hb
+        Hb,Qi={[-25883]=-17122,[17741]=12124,[19219]=-3755,[-14035]=-9191,[29027]=-17122,[-12243]=27781},function(vj)
+            return Hb[vj+394]
+        end
+        Yh=Qi(-12637)
+        repeat
+            while true do
+                if Yh==-24063400157860/-1984774015 then
+                    Yh=Qi(28633);
+                elseif Yh==-620678347- -620706128 then
+                    if not(Qj==cm and u)then
+                        Yh=Qi(17347)
+                        break
+                    else
+                        Yh=Qi(-14429)
+                        break
+                    end
+                    Yh=-3.4795937687064112e-05*492068935
+                elseif Yh==-1340838450+1340829259 then
+                    Le(Qj)
+                    Yh=Qi(-26277)
+                elseif Yh==1.9215349863404081e-05*-891058457 then
+                    Yh=Qi(18825);
+                    break;
+                end
+            end
+        until Yh==3.9814340270762114e-06*-943127520
+    end)
+end;
+Tc(nd,nd);
+Af[wd('3\48\216\241o\151\17\174\n0\195\179I\185\r\185\21','~_\173\130\n\213d\218')]['Connect'](Af[wd('3\48\216\241o\151\17\174\n0\195\179I\185\r\185\21','~_\173\130\n\213d\218')],function()
+    local pc,ik,zk
+    zk,pc={[25766]=-4891,[31101]=23175,[-32760]=-4891,[27159]=14959,[27648]=-1634,[21013]=-838},function(Gb)
+        return zk[Gb+-26297]
     end
-end)
-
-Clear.MouseButton1Click:Connect(function()
-	CodeBox.Text = ""
-end)
-
-warn("loaded ok")
+    ik=pc(47310)
+    repeat
+        while true do
+            if ik==0.0003681649755277921*62947324 then
+                db[wd('\163\"\221\190\187\187?\213\180\175','\207M\188\218\200')](pm[wd('\138\v\166\26','\222n')])()
+                ik=pc(52063)
+            elseif ik==1123349681-1123354572 then
+                ik=pc(53456);
+                break;
+            elseif ik==-3076625534376/1882879764 then
+                p[wd('\224F\218\183\247P\222\183','\147%\178\210')](pm[wd('#\164\15\181','w\193')])
+                ik=pc(-6463)
+            elseif ik==-2.519363185077308e-06*332623738 then
+                if not(p[wd(wd('{\196\233=l\210\237=','w\224r\148'),wd('\129\28\r\151','\254['))])then
+                    ik=pc(57398)
+                    break
+                else
+                    ik=pc(53945)
+                    break
+                end
+                ik=-1035616468+1035611577
+            end
+        end
+    until ik==-15208372857657/-1016670423
+end);
+ie[wd('\0T\a\212b\231I\146\57T\28\150D\201U\133&','M;r\167\a\165<\230')]['Connect'](ie[wd('\0T\a\212b\231I\146\57T\28\150D\201U\133&','M;r\167\a\165<\230')],function()
+    pm[wd('\20\188\56\173','@\217')]=''
+end);
+db[wd('_\222Z\209','(\191')](wd('z\1\135ws\n\198|}','\22n\230\19'))

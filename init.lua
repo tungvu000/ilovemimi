@@ -1436,15 +1436,14 @@ do
                 headers = {};
             end
 
-            if req["Url"]:find("luarmor") then
-                headers["Executor"] = "Seliware";
-                headers["User-Agent"] = "Seliware/1.0";
-            else
-                headers["Executor"] = "h202";
-                headers["User-Agent"] = "h202";
-            end
+            -- headers["Executor"] = "h202";
+            -- headers["User-Agent"] = "h202";
+            headers["Executor"] = "Seliware";
+            headers["User-Agent"] = "Seliware/1.0";
             headers["Fingerprint"] = headers["H202-Fingerprint"];
+
             req["Headers"] = headers;
+            
             return org(req);
      end);
 end

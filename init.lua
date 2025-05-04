@@ -1440,6 +1440,7 @@ do
      end);
 end
 
+local CoreGui = cloneref(game:GetService("CoreGui"))
 local uis = cloneref(game:GetService("UserInputService"))
 local plr = cloneref(game:GetService("Players").LocalPlayer or game:GetService("Players"):GetPropertyChangedSignal("LocalPlayer"):Wait())
 local mouse = plr:GetMouse()
@@ -1454,7 +1455,7 @@ local CodeBox = Instance.new("TextBox")
 local HideBox = Instance.new("TextLabel")
 
 h202.Name = "h202"
-h202.Parent = gethui()
+h202.Parent = CoreGui
 h202.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 h202.ResetOnSpawn = false
 

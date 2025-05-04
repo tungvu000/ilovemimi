@@ -1418,7 +1418,7 @@ if dtc then
     setreadonly(dtc, true);
 end
 
-local HWID = tostring(cloneref(game:GetService("RbxAnalyticsService")):GetClientId()):gsub("%-", "")
+-- local HWID = tostring(cloneref(game:GetService("RbxAnalyticsService")):GetClientId()):gsub("%-", "")
 
 do
      local org;
@@ -1443,7 +1443,7 @@ do
                 headers["Executor"] = "h202";
                 headers["User-Agent"] = "h202";
             end
-            headers["Fingerprint"] = HWID;
+            headers["Fingerprint"] = headers["H202-Fingerprint"];
             req["Headers"] = headers;
             return org(req);
      end);

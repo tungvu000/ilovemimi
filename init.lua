@@ -1440,10 +1440,6 @@ do
                 headers = {};
             end
 
-            -- headers["Executor"] = "h202";
-            -- headers["User-Agent"] = "h202";
-            -- headers["Fingerprint"] = HWID;
-
             headers["Executor"] = "Seliware";
             headers["User-Agent"] = "Seliware/1.0";
             headers["Seliware-Fingerprint"] = HWID;
@@ -1454,6 +1450,12 @@ do
             return org(req);
      end);
 end
+
+if _dtc_.pushautoexec then
+    task.spawn(_dtc_.pushautoexec)
+end
+
+repeat task.wait() until game:IsLoaded()
 
 local CoreGui = cloneref(game:GetService("CoreGui"))
 local uis = cloneref(game:GetService("UserInputService"))
@@ -1624,8 +1626,4 @@ Clear.MouseButton1Click:Connect(function()
 	CodeBox.Text = ""
 end)
 
-if _dtc_.pushautoexec then
-    _dtc_.pushautoexec();
-end
-
-warn("loaded")
+warn("loaded ok")

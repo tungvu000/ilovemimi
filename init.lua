@@ -30,6 +30,8 @@ if dtc then
     setreadonly(dtc, true);
 end
 
+local HWID = gethwid()
+
 do
 	local org;
 	org = hookfunction(request, function(req)

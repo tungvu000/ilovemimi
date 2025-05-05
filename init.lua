@@ -79,6 +79,7 @@ local ui_config = {
 		{"HoHo Hub 🔥", [[loadstring("https://raw.githubusercontent.com/acsu123/HOHO_H/main/Loading_UI")()]]},
 		{"Mobile Keyboard", [[loadstring("https://raw.githubusercontent.com/advxzivhsjjdhxhsidifvsh/mobkeyboard/main/main.txt")()]]},
 		{"DEX Explorer", [[loadstring("https://raw.githubusercontent.com/FaithfulAC/RBLX_Scripts/refs/heads/main/Universal/BypassedDarkDexV3.lua")()]]},
+        {"Infinite Yield", [[loadstring("https://raw.githubusercontent.com/EdgeIY/infiniteyield/refs/heads/master/source")()]]},
 		{"Unnamed ESP", [[loadstring("https://raw.githubusercontent.com/ic3w0lf22/Unnamed-ESP/master/UnnamedESP.lua")()]]},
 	},
 	Settings = {
@@ -374,7 +375,7 @@ local HeHeHeHeUI = {
 HeHeHeHeUI.HeHeHeHeUI.Name = "HeHeHeHeUI"
 HeHeHeHeUI.HeHeHeHeUI.Parent = CoreGui
 HeHeHeHeUI.HeHeHeHeUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-HeHeHeHeUI.HeHeHeHeUI.ZIndex = 9e9
+HeHeHeHeUI.HeHeHeHeUI.DisplayOrder = 9e9
 
 HeHeHeHeUI.BackFrame.Name = "BackFrame"
 HeHeHeHeUI.BackFrame.Parent = HeHeHeHeUI.HeHeHeHeUI

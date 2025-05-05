@@ -76,11 +76,11 @@ local ui_config = {
 	},
 	TimeKeyLeft = 9e9,
 	PopularScripts = {
-		{"HoHo Hub 🔥", [[loadstring("https://raw.githubusercontent.com/acsu123/HOHO_H/main/Loading_UI")()]]},
-		{"Mobile Keyboard", [[loadstring("https://raw.githubusercontent.com/advxzivhsjjdhxhsidifvsh/mobkeyboard/main/main.txt")()]]},
-		{"DEX Explorer", [[loadstring("https://raw.githubusercontent.com/FaithfulAC/RBLX_Scripts/refs/heads/main/Universal/BypassedDarkDexV3.lua")()]]},
-        {"Infinite Yield", [[loadstring("https://raw.githubusercontent.com/EdgeIY/infiniteyield/refs/heads/master/source")()]]},
-		{"Unnamed ESP", [[loadstring("https://raw.githubusercontent.com/ic3w0lf22/Unnamed-ESP/master/UnnamedESP.lua")()]]},
+		{"HoHo Hub 🔥", [[loadstring(game:HttpGet("https://raw.githubusercontent.com/acsu123/HOHO_H/main/Loading_UI"))()]]},
+		{"Mobile Keyboard", [[loadstring(game:HttpGet("https://raw.githubusercontent.com/advxzivhsjjdhxhsidifvsh/mobkeyboard/main/main.txt"))()]]},
+		{"DEX Explorer", [[loadstring(game:HttpGet("https://raw.githubusercontent.com/FaithfulAC/RBLX_Scripts/refs/heads/main/Universal/BypassedDarkDexV3.lua"))()]]},
+        {"Infinite Yield", [[loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/refs/heads/master/source"))()]]},
+		{"Unnamed ESP", [[loadstring(game:HttpGet("https://raw.githubusercontent.com/ic3w0lf22/Unnamed-ESP/master/UnnamedESP.lua"))()]]},
 	},
 	Settings = {
 		{"Test Toggle", function(boolean)
@@ -3098,7 +3098,7 @@ do
 	end)
 
 	HeHeHeHeUI.PasteScript.MouseButton1Click:Connect(function()
-		HeHeHeHeUI.Source.Text = readclipboard()
+		HeHeHeHeUI.Source.Text = getclipboard()
 	end)
 end
 
@@ -3234,9 +3234,9 @@ do
 	end
 
 	HeHeHeHeUI.ExampleScriptHub.Parent = nil
-	HeHeHeHeUI.SearchedPage.CanvasSize = UDim2.new(0, 0, 0, HeHeHeHeUI.SearchedPage.UIGridLayout.AbsoluteCellSize.Y)
-	HeHeHeHeUI.SearchedPage.UIGridLayout:GetPropertyChangedSignal("AbsoluteCellSize"):Connect(function()
-		HeHeHeHeUI.SearchedPage.CanvasSize = UDim2.new(0, 0, 0, HeHeHeHeUI.SearchedPage.UIGridLayout.AbsoluteCellSize.Y)
+	HeHeHeHeUI.SearchedPage.CanvasSize = UDim2.new(0, 0, 0, HeHeHeHeUI.SearchedPage.UIGridLayout.AbsoluteContentSize.Y)
+	HeHeHeHeUI.SearchedPage.UIGridLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		HeHeHeHeUI.SearchedPage.CanvasSize = UDim2.new(0, 0, 0, HeHeHeHeUI.SearchedPage.UIGridLayout.AbsoluteContentSize.Y)
 	end)
 
 	local function clearSearched()
@@ -3258,6 +3258,7 @@ do
 				loadstring(source)()
 			end
 		end)
+        obj.Parent = HeHeHeHeUI.SearchedPage
 	end
 
 	local function searchScript()
@@ -3289,6 +3290,7 @@ do
 	HeHeHeHeUI.DeepSearchBox.FocusLost:Connect(searchScript)
 
 	HeHeHeHeUI.QuickSearchBox.FocusLost:Connect(function()
+        HeHeHeHeUI.DeepSearchBox.Text = HeHeHeHeUI.QuickSearchBox.Text
 		openScriptHubF()
 		searchScript()
 	end)
@@ -3422,7 +3424,7 @@ CoolLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 CoolLabel.BackgroundTransparency = 1.000
 CoolLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
 CoolLabel.BorderSizePixel = 0
-CoolLabel.Position = UDim2.new(-1.51524031, 0, 0.66, 0)
+CoolLabel.Position = UDim2.new(-1.51524031, 0, 0.5, 0)
 CoolLabel.Rotation = -90.000
 CoolLabel.Size = UDim2.new(3.99222708, 0, 0.0624416508, 0)
 CoolLabel.Font = Enum.Font.Unknown

@@ -59,6 +59,8 @@ do
 	end);
 end
 
+repeat task.wait() until game:IsLoaded()
+
 local CoreGui = cloneref(game:GetService("CoreGui"))
 local StarterGui = cloneref(game:GetService("StarterGui"))
 local uis = cloneref(game:GetService("UserInputService"))
@@ -220,6 +222,7 @@ do
 		if (status.code == "KEY_VALID") then			
 			whitelisted = true
 			writefile("ExecutorKey.txt", key)
+			KeyGui:Destroy()
 		end
 		checking_key = false
 	end
@@ -240,8 +243,6 @@ end
 if _dtc_.pushautoexec then
    task.spawn(_dtc_.pushautoexec)
 end
-
-repeat task.wait() until game:IsLoaded()
 
 local ui_config = {
 	Logo = "rbxassetid://6534621134",

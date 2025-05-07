@@ -59,6 +59,184 @@ do
 	end);
 end
 
+local CoreGui = cloneref(game:GetService("CoreGui"))
+local StarterGui = cloneref(game:GetService("StarterGui"))
+local uis = cloneref(game:GetService("UserInputService"))
+local plr = cloneref(game:GetService("Players").LocalPlayer or game:GetService("Players"):GetPropertyChangedSignal("LocalPlayer"):Wait())
+local mouse = plr:GetMouse()
+
+do
+	local KeyGui = Instance.new("ScreenGui")
+	local Frame = Instance.new("Frame")
+	local ImageLabel = Instance.new("ImageLabel")
+	local UICorner = Instance.new("UICorner")
+	local Frame_2 = Instance.new("Frame")
+	local UICorner_2 = Instance.new("UICorner")
+	local TextButton = Instance.new("TextButton")
+	local UICorner_3 = Instance.new("UICorner")
+	local UITextSizeConstraint = Instance.new("UITextSizeConstraint")
+	local TextBox = Instance.new("TextBox")
+	local UITextSizeConstraint_2 = Instance.new("UITextSizeConstraint")
+	local TextButton_2 = Instance.new("TextButton")
+	local UITextSizeConstraint_3 = Instance.new("UITextSizeConstraint")
+	local UICorner_4 = Instance.new("UICorner")
+	local TextLabel = Instance.new("TextLabel")
+	local UITextSizeConstraint_4 = Instance.new("UITextSizeConstraint")
+	
+	
+	KeyGui.Name = "KeyGui"
+	KeyGui.Parent = CoreGui
+	KeyGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	KeyGui.DisplayOrder = 999999999
+	
+	Frame.Parent = KeyGui
+	Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	Frame.BorderSizePixel = 0
+	Frame.Position = UDim2.new(0.374193549, 0, 0.217336684, 0)
+	Frame.Size = UDim2.new(0.270897835, 0, 0.565326631, 0)
+	
+	ImageLabel.Parent = Frame
+	ImageLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	ImageLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	ImageLabel.BorderSizePixel = 0
+	ImageLabel.Size = UDim2.new(1, 0, 0.444444448, 0)
+	ImageLabel.Image = "rbxassetid://9311640472"
+	
+	UICorner.Parent = ImageLabel
+	
+	Frame_2.Parent = Frame
+	Frame_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	Frame_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	Frame_2.BorderSizePixel = 0
+	Frame_2.Position = UDim2.new(0, 0, 0.362222224, 0)
+	Frame_2.Size = UDim2.new(1, 0, 0.637777805, 0)
+	
+	UICorner_2.CornerRadius = UDim.new(0, 16)
+	UICorner_2.Parent = Frame_2
+	
+	TextButton.Parent = Frame_2
+	TextButton.BackgroundColor3 = Color3.fromRGB(0, 85, 255)
+	TextButton.BackgroundTransparency = 0.600
+	TextButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	TextButton.BorderSizePixel = 0
+	TextButton.Position = UDim2.new(0.119999997, 0, 0.533101022, 0)
+	TextButton.Size = UDim2.new(0.762857139, 0, 0.174216032, 0)
+	TextButton.Font = Enum.Font.Roboto
+	TextButton.Text = "Sumbit"
+	TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	TextButton.TextScaled = true
+	TextButton.TextSize = 14.000
+	TextButton.TextWrapped = true
+	
+	UICorner_3.CornerRadius = UDim.new(0, 80)
+	UICorner_3.Parent = TextButton
+	
+	UITextSizeConstraint.Parent = TextButton
+	UITextSizeConstraint.MaxTextSize = 14
+	
+	TextBox.Parent = Frame_2
+	TextBox.BackgroundColor3 = Color3.fromRGB(232, 232, 232)
+	TextBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	TextBox.BorderSizePixel = 0
+	TextBox.Position = UDim2.new(0.119999997, 0, 0.299651563, 0)
+	TextBox.Size = UDim2.new(0.762857139, 0, 0.174216032, 0)
+	TextBox.Font = Enum.Font.SourceSans
+	TextBox.PlaceholderText = "| Enter Your Key Here"
+	TextBox.Text = ""
+	TextBox.TextColor3 = Color3.fromRGB(0, 0, 0)
+	TextBox.TextScaled = true
+	TextBox.TextSize = 14.000
+	TextBox.TextWrapped = true
+	TextBox.TextXAlignment = Enum.TextXAlignment.Left
+	
+	UITextSizeConstraint_2.Parent = TextBox
+	UITextSizeConstraint_2.MaxTextSize = 14
+	
+	TextButton_2.Parent = Frame_2
+	TextButton_2.BackgroundColor3 = Color3.fromRGB(0, 85, 255)
+	TextButton_2.BackgroundTransparency = 1.000
+	TextButton_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	TextButton_2.BorderSizePixel = 0
+	TextButton_2.Position = UDim2.new(0.119999997, 0, 0.738675952, 0)
+	TextButton_2.Size = UDim2.new(0.762857139, 0, 0.073170729, 0)
+	TextButton_2.Font = Enum.Font.Unknown
+	TextButton_2.Text = "Click here to get your key!"
+	TextButton_2.TextColor3 = Color3.fromRGB(0, 85, 255)
+	TextButton_2.TextScaled = true
+	TextButton_2.TextSize = 14.000
+	TextButton_2.TextWrapped = true
+	TextButton_2.Font = Enum.Font.Roboto
+	
+	UITextSizeConstraint_3.Parent = TextButton_2
+	UITextSizeConstraint_3.MaxTextSize = 14
+	
+	UICorner_4.Parent = Frame
+	
+	TextLabel.Parent = Frame
+	TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	TextLabel.BackgroundTransparency = 1.000
+	TextLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	TextLabel.BorderSizePixel = 0
+	TextLabel.Position = UDim2.new(0.119999997, 0, 0.408888876, 0)
+	TextLabel.Size = UDim2.new(0.762857139, 0, 0.111111112, 0)
+	TextLabel.Font = Enum.Font.DenkOne
+	TextLabel.Text = "Welcome to h202.me!"
+	TextLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+	TextLabel.TextScaled = true
+	TextLabel.TextSize = 30.000
+	TextLabel.TextWrapped = true
+	
+	UITextSizeConstraint_4.Parent = TextLabel
+	UITextSizeConstraint_4.MaxTextSize = 30
+	
+	TextButton_2.MouseButton1Click:Connect(function()
+		setclipboard("https://www.h202.me/api/getkey?hwid=" .. tick())
+		StarterGui:SetCore("SendNotification",{
+            Title = "Key System",
+            Text = "Key Link Copied!",
+            Icon = "rbxassetid://16276677105"
+        })
+	end)
+
+	local api = loadstring(game:HttpGet("https://sdkapi-public.luarmor.net/library.lua"))()
+	api.script_id = "436716acc42ee95ee3eda5d3726a1a33"
+	
+	local checking_key = false
+	local whitelisted = false
+
+	local do_check_key = function(key)
+		if checking_key then return end
+		checking_key = true
+		key = key:gsub("[\r\n%z]", " "):gsub("[ \t]", ""):gsub("[ \n]", ""):gsub("[ \t]+%f[\r\n%z]", "")
+		local status = api.check_key(key);
+
+		StarterGui:SetCore("SendNotification",{
+			Title = "Key System",
+			Text = "[".. status.code .. "] " .. status.message,
+			Icon = "rbxassetid://16276677105"
+		})
+
+		if (status.code == "KEY_VALID") then			
+			whitelisted = true
+			writefile("ExecutorKey.txt", key)
+		end
+		checking_key = false
+	end
+	
+	TextButton.MouseButton1Click:Connect(function()
+		do_check_key(TextBox.Text)
+	end)
+
+	if isfile("ExecutorKey.txt") then
+		local key = readfile("ExecutorKey.txt")
+		TextBox.Text = key
+		do_check_key(key)
+	end
+
+	repeat task.wait() until whitelisted
+end
+
 if _dtc_.pushautoexec then
    task.spawn(_dtc_.pushautoexec)
 end
@@ -93,11 +271,6 @@ local ui_config = {
 		end},
 	}
 }
-
-local CoreGui = cloneref(game:GetService("CoreGui"))
-local uis = cloneref(game:GetService("UserInputService"))
-local plr = cloneref(game:GetService("Players").LocalPlayer or game:GetService("Players"):GetPropertyChangedSignal("LocalPlayer"):Wait())
-local mouse = plr:GetMouse()
 
 local HeHeHeHeUI = {
 	HeHeHeHeUI = Instance.new("ScreenGui"),

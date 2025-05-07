@@ -202,7 +202,7 @@ do
 	end)
 
 	local api = loadstring(game:HttpGet("https://sdkapi-public.luarmor.net/library.lua"))()
-	api.script_id = "436716acc42ee95ee3eda5d3726a1a33"
+	api.script_id = "e4aedc7ccd2bacd83555baa884f3d4b1"
 	
 	local checking_key = false
 	local whitelisted = false
@@ -221,7 +221,7 @@ do
 
 		if (status.code == "KEY_VALID") then			
 			whitelisted = true
-			writefile("ExecutorKey.txt", key)
+			writefile("HohoKeyV4.txt", key)
 			KeyGui:Destroy()
 		end
 		checking_key = false
@@ -231,8 +231,8 @@ do
 		do_check_key(TextBox.Text)
 	end)
 
-	if isfile("ExecutorKey.txt") then
-		local key = readfile("ExecutorKey.txt")
+	if isfile("HohoKeyV4.txt") then
+		local key = readfile("HohoKeyV4.txt")
 		TextBox.Text = key
 		do_check_key(key)
 	end

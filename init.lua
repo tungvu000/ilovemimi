@@ -3633,8 +3633,6 @@ MiniLogoStroke.Parent = MiniLogo
 MiniLogoStroke.Color = Color3.fromRGB(255, 255, 255)
 MiniLogoStroke.Thickness = 4
 
-MiniLogo.Visible = false
-
 MiniLogo.MouseButton1Click:Connect(function()
 	MiniLogo.Visible = false
 	HeHeHeHeUI.BackFrame.Visible = true

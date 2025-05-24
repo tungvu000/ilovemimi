@@ -3640,6 +3640,9 @@ MiniLogo.MouseButton1Click:Connect(function()
 	HeHeHeHeUI.BackFrame.Visible = true
 end)
 
+MiniLogo.Visible = true
+HeHeHeHeUI.BackFrame.Visible = false
+
 MakeDraggable(HeHeHeHeUI.BackFrame, HeHeHeHeUI.BackFrame)
 MakeDraggable(MiniLogo, MiniLogo)
 
@@ -3658,3 +3661,5 @@ for i, v in pairs(HeHeHeHeUI.HeHeHeHeUI:GetDescendants()) do
 		end)
 	end
 end
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/acsu123/HohoV2/refs/heads/main/BloxFruit/Tracking"))()
